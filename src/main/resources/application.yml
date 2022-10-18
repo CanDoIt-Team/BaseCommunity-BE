@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/baseCommunity?serverTimezone=UTC&characterEncoding=UTF-8
     username: root
-    password: 3128
+    password: 1111
 
   jpa:
     hibernate:
@@ -18,7 +18,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: basecommunity.web@gmail.com
-    password: yybvxiiuauevdlzl
+    password: password
     properties:
       mail:
         smtp:
