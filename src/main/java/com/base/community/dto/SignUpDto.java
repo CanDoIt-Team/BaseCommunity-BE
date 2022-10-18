@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,5 +16,4 @@ public class SignUpDto {
     private String nickname;
     private LocalDate birth;
     private String phone;
-    private List<String> skills;
 }
