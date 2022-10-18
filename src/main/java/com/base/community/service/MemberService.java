@@ -1,13 +1,16 @@
 package com.base.community.service;
 
 import com.base.community.component.MailComponent;
+import com.base.community.dto.ChangePasswordDto;
 import com.base.community.dto.SignUpDto;
 import com.base.community.exception.CustomException;
+import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.model.repository.MemberRepository;
 import com.base.community.type.MemberCode;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,4 +77,58 @@ public class MemberService {
         return true;
     }
 
+    public boolean findPassword(ChangePasswordDto form) {
+        Optional<Member> optionalMember = memberRepository
+                .findByEmailAndName(form.getEmail(), form.getName());
+        if(optionalMember.isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+
+        String uuid = UUID.randomUUID().toString();
+        member.setChangePasswordKey(uuid);
+        member.setChangePasswordLimitDt(LocalDateTime.now().plusHours(24)); // 24 시간 동안 유효
+        memberRepository.save(member);
+
+
+        String email = form.getEmail();
+        String subject = "BaseCommunity 비밀번호 재설정 메일입니다.";
+        String text = "아래 링크를 클릭하셔서 비밀번호를 변경 해주세요." +
+                "<div><a target='_blank' href='http://localhost:8080/users/changepassword?uuid=" + uuid + "'> 비밀번호 재설정 링크 </a></div>";
+
+        mailComponent.sendMail2(email, subject, text);
+
+        return true;
+        
+        
+    }
+
+    public boolean changePassword(String uuid, String password) {
+        Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
+
+        if (!optionalMember.isPresent()) {
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+
+        if (member.getChangePasswordLimitDt() == null) {
+            throw new CustomException(NOT_VALID_DATE);
+        }
+        if (member.getChangePasswordLimitDt().isBefore(LocalDateTime.now())) {
+            throw new CustomException(NOT_VALID_DATE);
+        }
+
+        String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        member.setPassword(encPassword);
+        member.setChangePasswordKey("");
+        member.setChangePasswordLimitDt(null);
+        memberRepository.save(member);
+
+        return true;
+
+
+
+
+
+    }
 }

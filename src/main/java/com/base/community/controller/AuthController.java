@@ -1,5 +1,6 @@
 package com.base.community.controller;
 
+import com.base.community.dto.ChangePasswordDto;
 import com.base.community.dto.SignUpDto;
 import com.base.community.model.entity.Member;
 import com.base.community.service.MemberService;
@@ -35,5 +36,17 @@ public class AuthController {
     @GetMapping("/signup/email-auth")
     public ResponseEntity<Boolean> emailAuth(@RequestParam String id) {
         return ResponseEntity.ok(this.memberService.emailAuth(id));
+    }
+
+
+    @PostMapping("/findPassword")
+    public ResponseEntity<Boolean> findPassword(@RequestBody ChangePasswordDto form) {
+        return ResponseEntity.ok(this.memberService.findPassword(form));
+    }
+
+
+    @PostMapping("/newpassword")
+    public ResponseEntity<Boolean> changePassword(@RequestBody String password,@RequestParam String uuid){
+        return ResponseEntity.ok(this.memberService.changePassword(uuid, password));
     }
 }
