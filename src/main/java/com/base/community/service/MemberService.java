@@ -2,15 +2,13 @@ package com.base.community.service;
 
 import com.base.community.component.MailComponent;
 import com.base.community.dto.ChangePasswordDto;
+import com.base.community.dto.SendMailDto;
 import com.base.community.dto.SignUpDto;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.model.repository.MemberRepository;
-import com.base.community.type.MemberCode;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,9 +41,18 @@ public class MemberService {
         String encPassword = BCrypt.hashpw(signUpDto.getPassword(), BCrypt.gensalt());
         signUpDto.setPassword(encPassword);
 
-        Member member = memberRepository.save(Member.from(signUpDto, uuid));
+        Member member = memberRepository.save(Member.from(signUpDto));
+        member.setEmailAuthKey(uuid);
 
-        mailComponent.sendEmail(signUpDto.getEmail(), uuid);
+        SendMailDto mailDto = SendMailDto.builder()
+                .to(signUpDto.getEmail())
+                .subject("BaseCommunity 인증 메일 입니다.")
+                .text("<p>BaseCommunity 사이트 가입을 축하드립니다.<p>"
+                        + "<p>아래 링크를 클릭하셔서 가입을 완료 하세요.</p>"
+                        + "<a target='_blank' href='http://localhost:8080/users/signup/email-auth?id="
+                        + uuid + "'> 가입 완료 </a></div>")
+                .build();
+        mailComponent.sendEmail(mailDto);
 
         return member;
     }
@@ -80,7 +87,7 @@ public class MemberService {
     public boolean findPassword(ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository
                 .findByEmailAndName(form.getEmail(), form.getName());
-        if(optionalMember.isEmpty()) {
+        if (optionalMember.isEmpty()) {
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
@@ -90,17 +97,17 @@ public class MemberService {
         member.setChangePasswordLimitDt(LocalDateTime.now().plusHours(24)); // 24 시간 동안 유효
         memberRepository.save(member);
 
+        SendMailDto mailDto = SendMailDto.builder()
+                .to(form.getEmail())
+                .subject("BaseCommunity 비밀번호 재설정 메일입니다.")
+                .text("아래 링크를 클릭하셔서 비밀번호를 변경 해주세요."
+                        + "<div><a target='_blank' href='http://localhost:8080/users/changepassword?uuid="
+                        + uuid + "'> 비밀번호 재설정 링크 </a></div>")
+                .build();
 
-        String email = form.getEmail();
-        String subject = "BaseCommunity 비밀번호 재설정 메일입니다.";
-        String text = "아래 링크를 클릭하셔서 비밀번호를 변경 해주세요." +
-                "<div><a target='_blank' href='http://localhost:8080/users/changepassword?uuid=" + uuid + "'> 비밀번호 재설정 링크 </a></div>";
-
-        mailComponent.sendMail2(email, subject, text);
+        mailComponent.sendEmail(mailDto);
 
         return true;
-        
-        
     }
 
     public boolean changePassword(String uuid, String password) {
@@ -125,10 +132,5 @@ public class MemberService {
         memberRepository.save(member);
 
         return true;
-
-
-
-
-
     }
 }

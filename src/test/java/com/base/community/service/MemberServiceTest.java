@@ -5,9 +5,8 @@ import com.base.community.dto.SignUpDto;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
-import com.base.community.model.entity.Skill;
+import com.base.community.model.entity.UserSkills;
 import com.base.community.model.repository.MemberRepository;
-import com.base.community.type.MemberCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,15 +37,14 @@ class MemberServiceTest {
     @Mock
     private MailComponent mailComponent;
 
-    private final List<String> skilldtos = new ArrayList<>(List.of("skillname"));
 
     @DisplayName("회원 가입 성공")
     @Test
     void signup_success() {
         //given
-        List<Skill> skill = new ArrayList<>();
-        skill.add(Skill.builder().name("java").build());
-        skill.add(Skill.builder().name("spring").build());
+        List<UserSkills> skill = new ArrayList<>();
+        skill.add(UserSkills.builder().name("java").build());
+        skill.add(UserSkills.builder().name("spring").build());
 
         Member member = Member.builder()
                 .id(1L)
@@ -64,7 +62,7 @@ class MemberServiceTest {
 
         given(memberRepository.existsByEmail(any())).willReturn(false);
         given(memberRepository.existsByNickname(any())).willReturn(false);
-        given(mailComponent.sendEmail(any(), any())).willReturn(true);
+        given(mailComponent.sendEmail(any())).willReturn(true);
         given(memberRepository.save(any()))
                 .willReturn(member);
 
@@ -76,7 +74,6 @@ class MemberServiceTest {
                 .nickname("testse")
                 .birth(LocalDate.now())
                 .phone("01000000000")
-                .skills(skilldtos)
                 .build());
 
         //then
@@ -105,7 +102,6 @@ class MemberServiceTest {
                         .nickname("nickname")
                         .birth(LocalDate.now())
                         .phone("01000000000")
-                        .skills(skilldtos)
                         .build()))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_REGISTERED_USER.getMessage());
@@ -127,7 +123,6 @@ class MemberServiceTest {
                         .nickname("nickname")
                         .birth(LocalDate.now())
                         .phone("01000000000")
-                        .skills(skilldtos)
                         .build()))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_REGISTERED_NICKNAME.getMessage());
