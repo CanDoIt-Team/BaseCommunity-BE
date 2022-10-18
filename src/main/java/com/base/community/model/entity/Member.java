@@ -45,7 +45,8 @@ public class Member extends BaseEntity{
     private boolean emailAuth;
     private LocalDateTime emailAuthDate;
     private String emailAuthKey;
-
+    private String changePasswordKey;
+    private LocalDateTime changePasswordLimitDt;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
     @Builder.Default
