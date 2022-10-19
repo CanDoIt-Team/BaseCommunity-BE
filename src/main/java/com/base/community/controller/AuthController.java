@@ -1,8 +1,9 @@
 package com.base.community.controller;
 
-import com.base.community.dto.ChangePasswordDto;
-import com.base.community.dto.SignInDto;
-import com.base.community.dto.SignUpDto;
+
+import com.base.community.dto.*;
+import com.base.community.exception.CustomException;
+import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.MemberService;
@@ -20,7 +21,7 @@ public class AuthController {
     private final MemberService memberService;
     private final TokenProvider tokenProvider;
 
-    @PostMapping("/signup")
+    @PostMapping("/signUp")
     public ResponseEntity<Member> signup(@RequestBody SignUpDto member) {
         Member result = this.memberService.signup(member);
         return ResponseEntity.ok(result);
@@ -48,17 +49,27 @@ public class AuthController {
     }
 
 
-    @PostMapping("/newpassword")
+    @PostMapping("/newPassword")
     public ResponseEntity<Boolean> changePassword(@RequestBody String password,@RequestParam String uuid){
         return ResponseEntity.ok(this.memberService.changePassword(uuid, password));
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/signIn")
     public  ResponseEntity<?> signIn(@RequestBody SignInDto request){
         var member = this.memberService.authenticate(request);
         var token = this.tokenProvider
                 .generateToken(member.getEmail(), member.getId());
         return ResponseEntity.ok(token);
 
+    }
+
+    @GetMapping("/getInfo")
+    public ResponseEntity<MemberDto> getInfo(@RequestHeader(name = "auth-token") String token){
+        User u = tokenProvider.getUser(token);
+        Member m = memberService.findByIdAndEmail(u.getId(),u.getEmail()).orElseThrow(
+                ()->new CustomException(ErrorCode.NOT_FOUND_USER));
+        log.info(u.getEmail()+"<-유저이메일/아이디 ->"+u.getId());
+        log.info(m.getEmail());
+        return ResponseEntity.ok(MemberDto.from(m));
     }
 }
