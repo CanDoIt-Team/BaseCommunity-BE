@@ -24,3 +24,6 @@ spring:
         smtp:
           starttls:
             enable: true
+
+  jwt:
+    secret: secret
