@@ -5,11 +5,11 @@ import com.base.community.dto.ChangePasswordDto;
 import com.base.community.dto.SendMailDto;
 import com.base.community.dto.SignInDto;
 import com.base.community.dto.SignUpDto;
+import com.base.community.dto.InfoChangePasswordDto;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.model.repository.MemberRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -91,7 +91,7 @@ public class MemberService implements UserDetailsService {
 
         return true;
     }
-
+    //로그인 페이지(비밀번호 재설정-유저 정보 입력)
     public boolean findPassword(ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository
                 .findByEmailAndName(form.getEmail(), form.getName());
@@ -117,7 +117,7 @@ public class MemberService implements UserDetailsService {
 
         return true;
     }
-
+    //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
     public boolean changePassword(String uuid, String password) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
 
@@ -147,20 +147,38 @@ public class MemberService implements UserDetailsService {
         return (UserDetails) this.memberRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다." + username));
     }
-    public Member authenticate(SignInDto member){
+
+
+    //로그인
+    public Member authenticate(SignInDto member) {
 
         var user = this.memberRepository.findByEmail(member.getEmail())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
 
-        if(!this.passwordEncoder.matches(member.getPassword(), user.getPassword())){
+        if (!this.passwordEncoder.matches(member.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
         return user;
     }
 
     public Optional<Member> findByIdAndEmail(Long id, String email) {
-        return  memberRepository.findById(id)
+        return memberRepository.findById(id)
                 .stream().filter(member -> member.getEmail().equals(email))
                 .findFirst();
+    }
+
+
+    //마이페이지 (비밀번호 재설정)
+    public boolean changePassword(InfoChangePasswordDto form) {
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if (!optionalMember.isPresent()) {
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+        String encPassword = BCrypt.hashpw(form.getNewPassword(), BCrypt.gensalt());
+        member.setPassword(encPassword);
+        memberRepository.save(member);
+
+        return true;
     }
 }
