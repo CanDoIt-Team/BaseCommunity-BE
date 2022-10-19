@@ -1,5 +1,6 @@
 package com.base.community.security;
 
+import com.base.community.dto.User;
 import com.base.community.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,8 +33,8 @@ public class TokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String generateToken(String username){
-        Claims claims = Jwts.claims().setSubject(username);
+    public String generateToken(String userPk, Long id){
+        Claims claims = Jwts.claims().setSubject(userPk).setId(id.toString());
 
         var now = new Date();
         var expiredDate = new Date(now.getTime() + TOKEN_EXPIRE_TIME);
@@ -47,8 +48,9 @@ public class TokenProvider {
 
     }
 
-    public String getUsername(String token){
-        return this.parseClaims(token).getSubject();
+    public User getUser(String token){
+        Claims claims = this.parseClaims(token);
+        return new User(Long.valueOf(claims.getId()), claims.getSubject());
     }
 
     public boolean validateToken(String token){
@@ -68,7 +70,7 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String jwt) {
-        UserDetails userDetails = this.memberService.loadUserByUsername(this.getUsername(jwt));
+        UserDetails userDetails = this.memberService.loadUserByUsername(this.getUser(jwt).getEmail());
         return new UsernamePasswordAuthenticationToken(userDetails, "");
     }
 }

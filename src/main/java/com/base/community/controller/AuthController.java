@@ -57,7 +57,7 @@ public class AuthController {
     public  ResponseEntity<?> signIn(@RequestBody SignInDto request){
         var member = this.memberService.authenticate(request);
         var token = this.tokenProvider
-                .generateToken(member.getEmail());
+                .generateToken(member.getEmail(), member.getId());
         return ResponseEntity.ok(token);
 
     }
