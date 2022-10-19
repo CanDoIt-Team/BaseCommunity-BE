@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class MemberDto {
     private String email;
-    private String password;
     private String name;
     private String nickname;
     private LocalDate birth;
@@ -23,6 +22,6 @@ public class MemberDto {
     private List<UserSkills> skills;
 
  public static MemberDto from(Member member){
-     return new MemberDto(member.getEmail(), member.getName(), member.getNickname(), member.getPhone(), member.getBirth(),member.getPhone(),member.getSkills());
+     return new MemberDto(member.getEmail(), member.getName(), member.getNickname(), member.getBirth(),member.getPhone(),member.getSkills());
  }
 }
