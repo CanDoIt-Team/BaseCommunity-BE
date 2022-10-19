@@ -1,8 +1,10 @@
 package com.base.community.controller;
 
 import com.base.community.dto.ChangePasswordDto;
+import com.base.community.dto.SignInDto;
 import com.base.community.dto.SignUpDto;
 import com.base.community.model.entity.Member;
+import com.base.community.security.TokenProvider;
 import com.base.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final MemberService memberService;
+    private final TokenProvider tokenProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<Member> signup(@RequestBody SignUpDto member) {
@@ -48,5 +51,14 @@ public class AuthController {
     @PostMapping("/newpassword")
     public ResponseEntity<Boolean> changePassword(@RequestBody String password,@RequestParam String uuid){
         return ResponseEntity.ok(this.memberService.changePassword(uuid, password));
+    }
+
+    @PostMapping("/signin")
+    public  ResponseEntity<?> signIn(@RequestBody SignInDto request){
+        var member = this.memberService.authenticate(request);
+        var token = this.tokenProvider
+                .generateToken(member.getEmail());
+        return ResponseEntity.ok(token);
+
     }
 }
