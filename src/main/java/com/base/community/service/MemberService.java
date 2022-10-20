@@ -215,4 +215,10 @@ public class MemberService implements UserDetailsService {
     }
 
 
+    public void deleteSkill(Long memberId, Long skillId) {
+        MemberSkills memberSkills = memberSkillsRepository.findByMemberIdAndId(memberId, skillId)
+                .orElseThrow(()->new CustomException(NOT_FOUND_SKILL));
+
+        memberSkillsRepository.delete(memberSkills);
+    }
 }

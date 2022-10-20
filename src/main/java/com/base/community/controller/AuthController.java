@@ -86,13 +86,19 @@ public class AuthController {
 
     }
 
-
-
     @PutMapping("/changePassword")
     public ResponseEntity<Boolean> updateMember(@RequestHeader(name = "auth-token") String token,
                                                 @RequestBody InfoChangePasswordDto form) {
         User u = tokenProvider.getUser(token);
         form.setId(u.getId());
         return ResponseEntity.ok(this.memberService.changePassword(form));
+    }
+
+    @DeleteMapping("/Info")
+    public ResponseEntity<Void> deleteSkill(@RequestHeader(name = "auth-token") String token,
+                                            @RequestParam Long id) {
+        memberService.deleteSkill(tokenProvider.getUser(token).getId(), id);
+
+        return ResponseEntity.ok().build();
     }
 }
