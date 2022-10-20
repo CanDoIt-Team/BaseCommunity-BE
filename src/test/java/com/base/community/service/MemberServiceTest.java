@@ -5,7 +5,7 @@ import com.base.community.dto.SignUpDto;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
-import com.base.community.model.entity.UserSkills;
+import com.base.community.model.entity.MemberSkills;
 import com.base.community.model.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -42,9 +42,9 @@ class MemberServiceTest {
     @Test
     void signup_success() {
         //given
-        List<UserSkills> skill = new ArrayList<>();
-        skill.add(UserSkills.builder().name("java").build());
-        skill.add(UserSkills.builder().name("spring").build());
+        List<MemberSkills> skill = new ArrayList<>();
+        skill.add(MemberSkills.builder().name("java").build());
+        skill.add(MemberSkills.builder().name("spring").build());
 
         Member member = Member.builder()
                 .id(1L)

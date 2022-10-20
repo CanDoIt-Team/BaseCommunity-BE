@@ -54,7 +54,7 @@ public class Member extends BaseEntity{
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
-    private List<UserSkills> skills = new ArrayList<>();
+    private List<MemberSkills> skills = new ArrayList<>();
 
     public static Member from(SignUpDto dto) {
         return Member.builder()

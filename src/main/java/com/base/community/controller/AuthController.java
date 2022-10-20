@@ -43,13 +43,13 @@ public class AuthController {
     }
 
 
-    @PostMapping("/findPassword")
+    @PostMapping("/signIn/findPassword")
     public ResponseEntity<Boolean> findPassword(@RequestBody ChangePasswordDto form) {
         return ResponseEntity.ok(this.memberService.findPassword(form));
     }
 
 
-    @PostMapping("/newPassword")
+    @PostMapping("/signIn/newPassword")
     public ResponseEntity<Boolean> changePassword(@RequestBody String password,@RequestParam String uuid){
         return ResponseEntity.ok(this.memberService.changePassword(uuid, password));
     }
@@ -71,5 +71,14 @@ public class AuthController {
         log.info(u.getEmail()+"<-유저이메일/아이디 ->"+u.getId());
         log.info(m.getEmail());
         return ResponseEntity.ok(MemberDto.from(m));
+    }
+
+
+    @PutMapping("/changePassword")
+    public ResponseEntity<Boolean> updateMember(@RequestHeader(name = "auth-token") String token,
+                                                  @RequestBody InfoChangePasswordDto form ) {
+        User u = tokenProvider.getUser(token);
+        form.setId(u.getId());
+        return ResponseEntity.ok(this.memberService.changePassword(form));
     }
 }

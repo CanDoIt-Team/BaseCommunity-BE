@@ -2,7 +2,7 @@ package com.base.community.dto;
 
 
 import com.base.community.model.entity.Member;
-import com.base.community.model.entity.UserSkills;
+import com.base.community.model.entity.MemberSkills;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +19,7 @@ public class MemberDto {
     private String nickname;
     private LocalDate birth;
     private String phone;
-    private List<UserSkills> skills;
+    private List<MemberSkills> skills;
 
  public static MemberDto from(Member member){
      return new MemberDto(member.getEmail(), member.getName(), member.getNickname(), member.getBirth(),member.getPhone(),member.getSkills());

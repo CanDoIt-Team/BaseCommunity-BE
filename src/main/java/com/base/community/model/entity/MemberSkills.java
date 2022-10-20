@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSkills {
+public class MemberSkills {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,8 +23,8 @@ public class UserSkills {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public static UserSkills of(String name) {
-        return UserSkills.builder()
+    public static MemberSkills of(String name) {
+        return MemberSkills.builder()
                 .name(name)
                 .build();
     }
