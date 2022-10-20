@@ -199,6 +199,7 @@ public class MemberService implements UserDetailsService {
 
     //멤버정보 업데이트
     public Member updateMember(Long id, MemberDto form, List<String> skillList) {
+        form.setId(id);
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
             throw new CustomException(NOT_FOUND_USER);
@@ -207,8 +208,10 @@ public class MemberService implements UserDetailsService {
         member.setPhone(form.getPhone());
         member.setBirth(form.getBirth());
 
-        MemberSkills memberSkills = MemberSkills.of(skillList);
-        member.getSkills().add(memberSkills);
+        if(skillList != null){
+            MemberSkills memberSkills = MemberSkills.of(skillList);
+            member.getSkills().add(memberSkills);
+        }
 
         memberRepository.save(member);
         return member;

@@ -53,6 +53,9 @@ public class Member extends BaseEntity{
     private String changePasswordKey;
     private LocalDateTime changePasswordLimitDt;
 
+    private String filename; //파일이름
+    private String urlFilename;  //파일주소
+
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)

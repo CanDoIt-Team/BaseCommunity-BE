@@ -11,10 +11,17 @@ import com.base.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -79,9 +86,8 @@ public class AuthController {
 
     @PostMapping("/Info")
     public ResponseEntity<MemberDto> updateInfo(@RequestHeader(name = "auth-token") String token,
-                                                @RequestBody MemberDto form,@RequestParam(name = "skill") List<String> skillList) {
-        User u = tokenProvider.getUser(token);
-        form.setId(u.getId());
+                                                @RequestBody MemberDto form, @RequestParam(name = "skill",required = false) List<String> skillList) {
+
         return ResponseEntity.ok(MemberDto.from(memberService.updateMember(tokenProvider.getUser(token).getId(),form, skillList)));
 
     }
@@ -101,4 +107,5 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
+
 }
