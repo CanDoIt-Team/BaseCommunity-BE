@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -196,19 +197,22 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    public Member addMemberSkills(Long id, AddMemberSkillsDto form) {
-        form.setMemberId(id);
-        Member member = memberRepository.findById(id)
-                .orElseThrow(()-> new CustomException(NOT_FOUND_USER));
-        if(member.getSkills().stream()
-                .anyMatch(skills -> skills.getName().equals(form.getName()))){
-            throw new CustomException(NOT_FOUND_SKILL);
+    //멤버정보 업데이트
+    public Member updateMember(Long id, MemberDto form, List<String> skillList) {
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if (optionalMember.isEmpty()) {
+            throw new CustomException(NOT_FOUND_USER);
         }
-        MemberSkills memberSkills = MemberSkills.of(form.getName());
-        member.getSkills().add(memberSkills);
-        memberRepository.save(member);
-//        memberSkillsRepository.save(memberSkills);
+        Member member = optionalMember.get();
+        member.setPhone(form.getPhone());
+        member.setBirth(form.getBirth());
 
+        MemberSkills memberSkills = MemberSkills.of(skillList);
+        member.getSkills().add(memberSkills);
+
+        memberRepository.save(member);
         return member;
     }
+
+
 }
