@@ -158,4 +158,9 @@ public class MemberService implements UserDetailsService {
         return user;
     }
 
+    public Optional<Member> findByIdAndEmail(Long id, String email) {
+        return  memberRepository.findById(id)
+                .stream().filter(member -> member.getEmail().equals(email))
+                .findFirst();
+    }
 }
