@@ -21,10 +21,12 @@ public class MemberDto {
     private String nickname;
     private LocalDate birth;
     private String phone;
+    private String filename; //파일이름
+    private String urlFilename;  //파일주소
     private List<MemberSkills> skills;
 
 
     public static MemberDto from(Member member) {
-        return new MemberDto(member.getId(), member.getEmail(), member.getPassword(), member.getName(), member.getNickname(), member.getBirth(), member.getPhone(), member.getSkills());
+        return new MemberDto(member.getId(), member.getEmail(), member.getPassword(), member.getName(), member.getNickname(), member.getBirth(), member.getPhone(),member.getUrlFilename(), member.getFilename(), member.getSkills());
     }
 }
