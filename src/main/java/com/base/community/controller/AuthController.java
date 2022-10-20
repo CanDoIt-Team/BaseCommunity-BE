@@ -5,7 +5,6 @@ import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
-import com.base.community.model.entity.MemberSkills;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -78,23 +77,16 @@ public class AuthController {
 
     @PostMapping("/Info")
     public ResponseEntity<MemberDto> updateInfo(@RequestHeader(name = "auth-token") String token,
-                                                  @RequestBody UpdateMemberDto form) {
+                                                @RequestBody MemberDto form,@RequestParam(name = "skill") List<String> skillList) {
         User u = tokenProvider.getUser(token);
         form.setId(u.getId());
-        return ResponseEntity.ok(MemberDto.from(memberService.updateMember(tokenProvider.getUser(token).getId(),form)));
-
-    }
-
-    @PostMapping("/Info/skill")
-    public ResponseEntity<MemberDto> addMemberSkills(@RequestHeader(name = "auth-token") String token,
-                                                     @RequestBody AddMemberSkillsDto form){
-        return ResponseEntity.ok(MemberDto.from(memberService.addMemberSkills(tokenProvider.getUser(token).getId(),form)));
+        return ResponseEntity.ok(MemberDto.from(memberService.updateMember(tokenProvider.getUser(token).getId(),form, skillList)));
 
     }
 
     @PutMapping("/changePassword")
     public ResponseEntity<Boolean> updateMember(@RequestHeader(name = "auth-token") String token,
-                                                @RequestBody InfoChangePasswordDto form) {
+                                                @RequestBody MemberDto form) {
         User u = tokenProvider.getUser(token);
         form.setId(u.getId());
         return ResponseEntity.ok(this.memberService.changePassword(form));

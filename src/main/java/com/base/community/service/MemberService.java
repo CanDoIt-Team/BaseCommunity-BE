@@ -7,7 +7,6 @@ import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.model.entity.MemberSkills;
 import com.base.community.model.repository.MemberRepository;
-import com.base.community.model.repository.MemberSkillsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,7 +30,6 @@ public class MemberService implements UserDetailsService {
 
     private final MailComponent mailComponent;
     private final MemberRepository memberRepository;
-    private final MemberSkillsRepository memberSkillsRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -90,6 +89,7 @@ public class MemberService implements UserDetailsService {
 
         return true;
     }
+
     //로그인 페이지(비밀번호 재설정-유저 정보 입력)
     public boolean findPassword(ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository
@@ -116,6 +116,7 @@ public class MemberService implements UserDetailsService {
 
         return true;
     }
+
     //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
     public boolean changePassword(String uuid, String password) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
@@ -168,21 +169,21 @@ public class MemberService implements UserDetailsService {
 
 
     //마이페이지 (비밀번호 재설정)
-    public boolean changePassword(InfoChangePasswordDto form) {
+    public boolean changePassword(MemberDto form) {
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (!optionalMember.isPresent()) {
             throw new CustomException(NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
-        String encPassword = BCrypt.hashpw(form.getNewPassword(), BCrypt.gensalt());
+        String encPassword = BCrypt.hashpw(form.getPassword(), BCrypt.gensalt());
         member.setPassword(encPassword);
         memberRepository.save(member);
 
         return true;
     }
 
-
-    public Member updateMember(Long id, UpdateMemberDto form) {
+    //멤버정보 업데이트
+    public Member updateMember(Long id, MemberDto form, List<String> skillList) {
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
             throw new CustomException(NOT_FOUND_USER);
@@ -190,25 +191,12 @@ public class MemberService implements UserDetailsService {
         Member member = optionalMember.get();
         member.setPhone(form.getPhone());
         member.setBirth(form.getBirth());
-        memberRepository.save(member);
 
-        return member;
-    }
-
-
-    public Member addMemberSkills(Long id, AddMemberSkillsDto form) {
-        form.setMemberId(id);
-        Member member = memberRepository.findById(id)
-                .orElseThrow(()-> new CustomException(NOT_FOUND_USER));
-        if(member.getSkills().stream()
-                .anyMatch(skills -> skills.getName().equals(form.getName()))){
-            throw new CustomException(NOT_FOUND_SKILL);
-        }
-        MemberSkills memberSkills = MemberSkills.of(form.getName());
+        MemberSkills memberSkills = MemberSkills.of(skillList);
         member.getSkills().add(memberSkills);
-        memberRepository.save(member);
-//        memberSkillsRepository.save(memberSkills);
 
+        memberRepository.save(member);
         return member;
     }
+
 }
