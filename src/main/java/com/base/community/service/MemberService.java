@@ -1,15 +1,13 @@
 package com.base.community.service;
 
 import com.base.community.component.MailComponent;
-import com.base.community.dto.ChangePasswordDto;
-import com.base.community.dto.SendMailDto;
-import com.base.community.dto.SignInDto;
-import com.base.community.dto.SignUpDto;
-import com.base.community.dto.InfoChangePasswordDto;
+import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
+import com.base.community.model.entity.MemberSkills;
 import com.base.community.model.repository.MemberRepository;
+import com.base.community.model.repository.MemberSkillsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,6 +30,7 @@ public class MemberService implements UserDetailsService {
 
     private final MailComponent mailComponent;
     private final MemberRepository memberRepository;
+    private final MemberSkillsRepository memberSkillsRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -180,5 +179,36 @@ public class MemberService implements UserDetailsService {
         memberRepository.save(member);
 
         return true;
+    }
+
+
+    public Member updateMember(Long id, UpdateMemberDto form) {
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if (optionalMember.isEmpty()) {
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+        member.setPhone(form.getPhone());
+        member.setBirth(form.getBirth());
+        memberRepository.save(member);
+
+        return member;
+    }
+
+
+    public Member addMemberSkills(Long id, AddMemberSkillsDto form) {
+        form.setMemberId(id);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()-> new CustomException(NOT_FOUND_USER));
+        if(member.getSkills().stream()
+                .anyMatch(skills -> skills.getName().equals(form.getName()))){
+            throw new CustomException(NOT_FOUND_SKILL);
+        }
+        MemberSkills memberSkills = MemberSkills.of(form.getName());
+        member.getSkills().add(memberSkills);
+        memberRepository.save(member);
+//        memberSkillsRepository.save(memberSkills);
+
+        return member;
     }
 }

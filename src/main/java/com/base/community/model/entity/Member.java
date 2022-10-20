@@ -1,6 +1,7 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.SignUpDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 
@@ -52,6 +53,8 @@ public class Member extends BaseEntity{
     private String changePasswordKey;
     private LocalDateTime changePasswordLimitDt;
 
+
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
     private List<MemberSkills> skills = new ArrayList<>();
