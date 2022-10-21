@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -223,5 +224,19 @@ public class MemberService implements UserDetailsService {
                 .orElseThrow(()->new CustomException(NOT_FOUND_SKILL));
 
         memberSkillsRepository.delete(memberSkills);
+    }
+
+    public Member uploadProfileImg(Long id, MemberDto form) {
+        form.setId(id);
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if(optionalMember.isEmpty()){
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+        member.setFilename(form.getFilename());
+        member.setUrlFilename(form.getUrlFilename());
+        memberRepository.save(member);
+        return member;
+
     }
 }
