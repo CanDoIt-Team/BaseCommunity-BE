@@ -1,11 +1,14 @@
 package com.base.community.service;
 
 import com.base.community.dto.ProjectDto;
+import com.base.community.dto.ProjectSkillDto;
 import com.base.community.exception.CustomException;
 import com.base.community.model.entity.Member;
 import com.base.community.model.entity.Project;
+import com.base.community.model.entity.ProjectSkill;
 import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.ProjectRepository;
+import com.base.community.model.repository.ProjectSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class ProjectService {
 
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectSkillRepository projectSkillRepository;
 
     @Transactional
     public Project createProject(Long memberId, ProjectDto parameter) {
@@ -59,6 +63,18 @@ public class ProjectService {
         project.setTitle(parameter.getTitle());
         project.setContent(parameter.getContent());
         project.setMaxTotal(parameter.getMaxTotal());
+
+        // todo - cascade로 연결되어 있어서 삭제가 안됨
+        // 해당 유저에 맞는 프로젝트 스킬 다 삭제 후 다시 넣음
+        Iterable<ProjectSkill> projectSkills = projectSkillRepository.findByProject(project);
+        for (ProjectSkill skill: projectSkills) {
+            projectSkillRepository.deleteById(skill.getId());
+        }
+
+        for (ProjectSkillDto dto: parameter.getProjectSkills()) {
+            ProjectSkill projectSkill = ProjectSkill.of(dto);
+            project.getProjectSkills().add(projectSkill);
+        }
 
         return project;
     }

@@ -1,7 +1,7 @@
 ### 프로젝트 등록
 POST http://localhost:8080/projects
 Content-Type: application/json
-X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzY1NTQwLCJleHAiOjE2NjYzNjkxNDB9.XS7O98UmhYpQ8-3XnlxLh5CHM04d5Obo4KMIZ7cCrd7qlKWIbFNaBU8ckip-0oaSSlpfntb02WunmJCqIg5vQw
+X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzcxNjIwLCJleHAiOjE2NjYzNzUyMjB9.7J78CUQpxpvGQpz7tLXBHgpo5RXwfTOV82RUa6QYKRfE-TpxydsHyXcnGkaBjLjoW6RGkxLIzppzDEUWLrGX_g
 
 {
   "content": "내용",
@@ -18,4 +18,22 @@ X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGki
     }
   ],
   "title": "웹 프로젝트"
+}
+
+### 프로젝트 수정
+PUT http://localhost:8080/projects
+Content-Type: application/json
+X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzcxNjIwLCJleHAiOjE2NjYzNzUyMjB9.7J78CUQpxpvGQpz7tLXBHgpo5RXwfTOV82RUa6QYKRfE-TpxydsHyXcnGkaBjLjoW6RGkxLIzppzDEUWLrGX_g
+
+{
+  "content": "string",
+  "id": 1,
+  "maxTotal": 6,
+  "projectSkills": [
+    {
+      "id": 0,
+      "name": "Django"
+    }
+  ],
+  "title": "string"
 }

@@ -62,6 +62,7 @@ public class Member extends BaseEntity{
     @JoinColumn(name = "member_id")
     private List<MemberSkills> skills = new ArrayList<>();
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
     private Project project;

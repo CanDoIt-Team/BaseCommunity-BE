@@ -1,12 +1,13 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.ProjectSkillDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -18,6 +19,7 @@ public class ProjectSkill {
 
     private String name;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
