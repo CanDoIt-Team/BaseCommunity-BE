@@ -1,0 +1,21 @@
+### 프로젝트 등록
+POST http://localhost:8080/projects
+Content-Type: application/json
+X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzY1NTQwLCJleHAiOjE2NjYzNjkxNDB9.XS7O98UmhYpQ8-3XnlxLh5CHM04d5Obo4KMIZ7cCrd7qlKWIbFNaBU8ckip-0oaSSlpfntb02WunmJCqIg5vQw
+
+{
+  "content": "내용",
+  "id": 0,
+  "maxTotal": 5,
+  "projectSkills": [
+    {
+      "name": "spring boot",
+      "projectId": 0
+    },
+    {
+      "name": "react",
+      "projectId": 0
+    }
+  ],
+  "title": "웹 프로젝트"
+}

@@ -62,6 +62,10 @@ public class Member extends BaseEntity{
     @JoinColumn(name = "member_id")
     private List<MemberSkills> skills = new ArrayList<>();
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "member_id")
+    private Project project;
+
     public static Member from(SignUpDto dto) {
         return Member.builder()
                 .email(dto.getEmail().toLowerCase(Locale.ROOT))
