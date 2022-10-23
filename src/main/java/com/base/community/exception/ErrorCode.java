@@ -23,7 +23,8 @@ public enum ErrorCode {
     NOT_VALID_USER(HttpStatus.BAD_REQUEST, "업데이트 권한이 없는 회원 입니다."),
     ALREADY_PROJECT_COMPLETE(HttpStatus.BAD_REQUEST, "마감한 프로젝트는 수정할 수 없습니다."),
     NOT_VALID_MAX_TOTAL(HttpStatus.BAD_REQUEST, "현재 신청한 인원보다 모집 인원의 수가 더 많아야 합니다."),
-    NOT_FOUND_PROJECT(HttpStatus.BAD_REQUEST, "일치하는 프로젝트가 없습니다.")
+    NOT_FOUND_PROJECT(HttpStatus.BAD_REQUEST, "일치하는 프로젝트가 없습니다."),
+    NOT_LEADER_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트 생성자가 아닙니다.")
     ;
 
     private final HttpStatus httpStatus;

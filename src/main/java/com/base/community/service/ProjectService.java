@@ -31,13 +31,13 @@ public class ProjectService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-        Optional<Project> projectOptional = projectRepository.findByLeader(member);
+        Optional<Project> projectOptional = projectRepository.findByLeaderId(memberId);
         if (projectOptional.isPresent()) {
             throw new CustomException(ALREADY_PROJECT_CREATE);
         }
 
         Project project = projectRepository.save(Project.of(parameter));
-        project.setLeader(member);
+        project.setLeaderId(memberId);
 
         return project;
     }
@@ -47,7 +47,7 @@ public class ProjectService {
         var project = projectRepository.findById(parameter.getId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
 
-        if (!Objects.equals(project.getLeader().getId(), memberId)) { // 작성자만 수정 가능
+        if (!Objects.equals(project.getLeaderId(), memberId)) { // 작성자만 수정 가능
             throw new CustomException(NOT_VALID_USER);
         }
 
@@ -64,7 +64,6 @@ public class ProjectService {
         project.setContent(parameter.getContent());
         project.setMaxTotal(parameter.getMaxTotal());
 
-        // todo - cascade로 연결되어 있어서 삭제가 안됨
         // 해당 유저에 맞는 프로젝트 스킬 다 삭제 후 다시 넣음
         Iterable<ProjectSkill> projectSkills = projectSkillRepository.findByProject(project);
         for (ProjectSkill skill: projectSkills) {
@@ -77,5 +76,23 @@ public class ProjectService {
         }
 
         return project;
+    }
+
+    @Transactional
+    public String deleteProject(Long memberId, Long projectId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_VALID_USER));
+
+        // 프로젝트 생성자 인지 확인
+        Project project = projectRepository.findByLeaderId(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+        if (!Objects.equals(project.getId(), projectId)) {
+            throw new CustomException(NOT_LEADER_PROJECT);
+        }
+
+        // 생성자면 delete 진행
+        projectRepository.delete(project);
+
+        return "삭제가 완료되었습니다.";
     }
 }

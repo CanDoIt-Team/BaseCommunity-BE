@@ -1,7 +1,7 @@
 ### 프로젝트 등록
 POST http://localhost:8080/projects
 Content-Type: application/json
-X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzcxNjIwLCJleHAiOjE2NjYzNzUyMjB9.7J78CUQpxpvGQpz7tLXBHgpo5RXwfTOV82RUa6QYKRfE-TpxydsHyXcnGkaBjLjoW6RGkxLIzppzDEUWLrGX_g
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2NDU3OTM0LCJleHAiOjE2NjY0NjE1MzR9.yu9eiKxcy6HFwEGtgyaxbyIrddvCyv_Dc3b5gLuoget8n_uPiUTw2hWUhu4m0hmxW9BWAsiUinCgLlQIjbnUlA
 
 {
   "content": "내용",
@@ -23,11 +23,11 @@ X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGki
 ### 프로젝트 수정
 PUT http://localhost:8080/projects
 Content-Type: application/json
-X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2MzcxNjIwLCJleHAiOjE2NjYzNzUyMjB9.7J78CUQpxpvGQpz7tLXBHgpo5RXwfTOV82RUa6QYKRfE-TpxydsHyXcnGkaBjLjoW6RGkxLIzppzDEUWLrGX_g
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2NDU3OTM0LCJleHAiOjE2NjY0NjE1MzR9.yu9eiKxcy6HFwEGtgyaxbyIrddvCyv_Dc3b5gLuoget8n_uPiUTw2hWUhu4m0hmxW9BWAsiUinCgLlQIjbnUlA
 
 {
   "content": "string",
-  "id": 1,
+  "id": 2,
   "maxTotal": 6,
   "projectSkills": [
     {
@@ -37,3 +37,8 @@ X-AUTH-TOCKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGki
   ],
   "title": "string"
 }
+
+### 프로젝트 삭제
+DELETE http://localhost:8080/projects/1
+Content-Type: application/json
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2NDU3OTM0LCJleHAiOjE2NjY0NjE1MzR9.yu9eiKxcy6HFwEGtgyaxbyIrddvCyv_Dc3b5gLuoget8n_uPiUTw2hWUhu4m0hmxW9BWAsiUinCgLlQIjbnUlA

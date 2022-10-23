@@ -26,6 +26,7 @@ import static com.base.community.type.MemberCode.MEMBER_STATUS_REQ;
 public class Member extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
@@ -62,10 +63,6 @@ public class Member extends BaseEntity{
     @JoinColumn(name = "member_id")
     private List<MemberSkills> skills = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "member_id")
-    private Project project;
 
     public static Member from(SignUpDto dto) {
         return Member.builder()

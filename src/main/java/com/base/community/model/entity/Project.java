@@ -23,10 +23,7 @@ public class Project extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "member_id")
-    private Member leader;
+    private Long leaderId;
 
     @NotBlank(message = "제목은 필수 입력 값입니다.")
     private String title;

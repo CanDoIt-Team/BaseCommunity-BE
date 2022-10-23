@@ -17,17 +17,23 @@ public class ProjectController {
     private final TokenProvider tokenProvider;
 
     @PostMapping
-    public ResponseEntity<?> registerProject(@RequestHeader(name = "X-AUTH-TOCKEN") String token,
+    public ResponseEntity<Project> registerProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
                                       @RequestBody ProjectDto parameter) {
         Project project = projectService.createProject(tokenProvider.getUser(token).getId(), parameter);
         return ResponseEntity.ok(project);
     }
 
     @PutMapping
-    public ResponseEntity<?> updateProject(@RequestHeader(name = "X-AUTH-TOCKEN") String token,
+    public ResponseEntity<Project> updateProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
                                            @RequestBody ProjectDto parameter) {
         Project project = projectService.updateProject(tokenProvider.getUser(token).getId(), parameter);
         return ResponseEntity.ok(project);
     }
 
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<?> deleteProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
+                                           @PathVariable("projectId") Long projectId) {
+        String result = projectService.deleteProject(tokenProvider.getUser(token).getId(), projectId);
+        return ResponseEntity.ok(result);
+    }
 }
