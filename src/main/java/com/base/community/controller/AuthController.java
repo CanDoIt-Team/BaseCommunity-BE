@@ -54,8 +54,8 @@ public class AuthController {
 
 
     @PostMapping("/password/new")
-    public ResponseEntity<Boolean> changePassword(@RequestBody String password,@RequestParam String uuid){
-        return ResponseEntity.ok(this.memberService.changePassword(uuid, password));
+    public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordDto form,@RequestParam String uuid){
+        return ResponseEntity.ok(this.memberService.changePassword(uuid, form));
     }
 
     @PostMapping("/signin")
