@@ -31,17 +31,17 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/signup/check/email")
+    @GetMapping("/check/email")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(this.memberService.checkEmail(email));
     }
 
-    @GetMapping("/signup/check/nickname")
+    @GetMapping("/check/nickname")
     public ResponseEntity<Boolean> checkNickName(@RequestParam String nickname) {
         return ResponseEntity.ok(this.memberService.checkNickName(nickname));
     }
 
-    @GetMapping("/signup/email-auth")
+    @GetMapping("/email-auth")
     public ResponseEntity<Boolean> emailAuth(@RequestParam String id) {
         return ResponseEntity.ok(this.memberService.emailAuth(id));
     }
