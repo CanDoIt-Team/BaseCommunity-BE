@@ -134,7 +134,7 @@ public class MemberService implements UserDetailsService {
         return true;
     }
     //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
-    public boolean changePassword(String uuid, String password) {
+    public boolean changePassword(String uuid, ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
 
         if (!optionalMember.isPresent()) {
@@ -149,7 +149,7 @@ public class MemberService implements UserDetailsService {
             throw new CustomException(NOT_VALID_DATE);
         }
 
-        String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        String encPassword = BCrypt.hashpw(form.getPassword(), BCrypt.gensalt());
         member.setPassword(encPassword);
         member.setChangePasswordKey("");
         member.setChangePasswordLimitDt(null);
