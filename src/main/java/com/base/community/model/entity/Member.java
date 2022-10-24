@@ -60,6 +60,7 @@ public class Member extends BaseEntity{
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
+    @Builder.Default
     private List<MemberSkills> skills = new ArrayList<>();
 
     public static Member from(SignUpDto dto) {

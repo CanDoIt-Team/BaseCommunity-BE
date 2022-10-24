@@ -73,7 +73,7 @@ public class MemberService implements UserDetailsService {
                 .subject("BaseCommunity 인증 메일 입니다.")
                 .text("<p>BaseCommunity 사이트 가입을 축하드립니다.<p>"
                         + "<p>아래 링크를 클릭하셔서 가입을 완료 하세요.</p>"
-                        + "<a target='_blank' href='http://localhost:8080/users/signup/email-auth?id="
+                        + "<a target='_blank' href='http://localhost:3000/users/email-auth?id="
                         + uuid + "'> 가입 완료 </a></div>")
                 .build();
         mailComponent.sendEmail(mailDto);
@@ -125,7 +125,7 @@ public class MemberService implements UserDetailsService {
                 .to(form.getEmail())
                 .subject("BaseCommunity 비밀번호 재설정 메일입니다.")
                 .text("아래 링크를 클릭하셔서 비밀번호를 변경 해주세요."
-                        + "<div><a target='_blank' href='http://localhost:8080/users/changepassword?uuid="
+                        + "<div><a target='_blank' href='http://localhost:3000/password/new?uuid="
                         + uuid + "'> 비밀번호 재설정 링크 </a></div>")
                 .build();
 
