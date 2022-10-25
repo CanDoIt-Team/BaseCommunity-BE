@@ -9,6 +9,8 @@ import com.base.community.model.entity.MemberSkills;
 import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.MemberSkillsRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,7 +18,13 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +35,7 @@ import static com.base.community.type.MemberCode.MEMBER_STATUS_ING;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberService implements UserDetailsService {
 
     private final MailComponent mailComponent;
@@ -34,6 +43,13 @@ public class MemberService implements UserDetailsService {
     private final MemberSkillsRepository memberSkillsRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${dir.LocalPath}")
+    String baseLocalPath;
+
+    @Value("${dir.UrlPath}")
+    String baseUrlPath;
+
 
     @Transactional
     public Member signup(SignUpDto signUpDto) {
@@ -57,7 +73,7 @@ public class MemberService implements UserDetailsService {
                 .subject("BaseCommunity 인증 메일 입니다.")
                 .text("<p>BaseCommunity 사이트 가입을 축하드립니다.<p>"
                         + "<p>아래 링크를 클릭하셔서 가입을 완료 하세요.</p>"
-                        + "<a target='_blank' href='http://localhost:8080/users/signup/email-auth?id="
+                        + "<a target='_blank' href='http://localhost:3000/users/email-auth?id="
                         + uuid + "'> 가입 완료 </a></div>")
                 .build();
         mailComponent.sendEmail(mailDto);
@@ -109,7 +125,7 @@ public class MemberService implements UserDetailsService {
                 .to(form.getEmail())
                 .subject("BaseCommunity 비밀번호 재설정 메일입니다.")
                 .text("아래 링크를 클릭하셔서 비밀번호를 변경 해주세요."
-                        + "<div><a target='_blank' href='http://localhost:8080/users/changepassword?uuid="
+                        + "<div><a target='_blank' href='http://localhost:3000/password/new?uuid="
                         + uuid + "'> 비밀번호 재설정 링크 </a></div>")
                 .build();
 
@@ -118,7 +134,7 @@ public class MemberService implements UserDetailsService {
         return true;
     }
     //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
-    public boolean changePassword(String uuid, String password) {
+    public boolean changePassword(String uuid, ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
 
         if (!optionalMember.isPresent()) {
@@ -133,7 +149,7 @@ public class MemberService implements UserDetailsService {
             throw new CustomException(NOT_VALID_DATE);
         }
 
-        String encPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        String encPassword = BCrypt.hashpw(form.getPassword(), BCrypt.gensalt());
         member.setPassword(encPassword);
         member.setChangePasswordKey("");
         member.setChangePasswordLimitDt(null);
@@ -224,4 +240,102 @@ public class MemberService implements UserDetailsService {
 
         memberSkillsRepository.delete(memberSkills);
     }
+
+
+
+    public Member uploadProfileImg(Long id, MultipartFile file) {
+
+        MemberDto form = new MemberDto();
+
+        String saveFilename = "";
+        String urlFilename = "";
+
+        if (file != null) {
+
+            String originalFilename = file.getOriginalFilename();
+            String[] arrFilename = getNewSaveFile(baseLocalPath, baseUrlPath, originalFilename);
+
+            saveFilename = arrFilename[0];
+            urlFilename = arrFilename[1];
+
+            try {
+                File newFile = new File(saveFilename);
+                FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(newFile));
+            } catch (IOException e) {
+                log.info(e.getMessage());
+            }
+        }
+
+        form.setFilename(saveFilename);
+        form.setUrlFilename(urlFilename);
+        form.setId(id);
+
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if(optionalMember.isEmpty()){
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+        member.setFilename(form.getFilename());
+        member.setUrlFilename(form.getUrlFilename());
+        memberRepository.save(member);
+        return member;
+
+    }
+
+    public void deleteMember(Long id) {
+        MemberDto form = new MemberDto();
+        form.setId(id);
+
+        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+        if (optionalMember.isEmpty()) {
+            throw new CustomException(NOT_FOUND_USER);
+        }
+        Member member = optionalMember.get();
+
+        memberRepository.delete(member);
+    }
+
+
+
+
+    private String[] getNewSaveFile(String baseLocalPath, String baseUrlPath, String originalFilename) {
+
+        LocalDate now = LocalDate.now();
+
+        String[] dirs = {
+                String.format("%s/%d/", baseLocalPath, now.getYear()),
+                String.format("%s/%d/%02d/", baseLocalPath, now.getYear(), now.getMonthValue()),
+                String.format("%s/%d/%02d/%02d/", baseLocalPath, now.getYear(), now.getMonthValue(), now.getDayOfMonth())};
+
+        String urlDir = String.format("%s/%d/%02d/%02d/", baseUrlPath, now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+
+        for (String dir : dirs) {
+            File file = new File(dir);
+            if (!file.isDirectory()) {
+                file.mkdir();
+            }
+        }
+
+        String fileExtension = "";
+        if (originalFilename != null) {
+            int dotPos = originalFilename.lastIndexOf(".");
+            if (dotPos > -1) {
+                fileExtension = originalFilename.substring(dotPos + 1);
+            }
+        }
+
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        String newFilename = String.format("%s%s", dirs[2], uuid);
+        String newUrlFilename = String.format("%s%s", urlDir, uuid);
+        if (fileExtension.length() > 0) {
+            newFilename += "." + fileExtension;
+            newUrlFilename += "." + fileExtension;
+        }
+
+        return new String[]{newFilename, newUrlFilename};
+    }
+
+
+
+
 }

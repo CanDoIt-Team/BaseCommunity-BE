@@ -1,21 +1,26 @@
-### 회원가입
+### 회원 가입
 POST http://localhost:8080/users/signUp
 Content-Type: application/json
 
 {
-  "birth": "2022-10-25",
-  "email": "bravo352@naver.com",
-  "name": "소희",
+  "birth": "2022-10-21",
+  "email": "thgml352@gmail.com",
+  "name": "강소희",
   "nickname": "닉네임",
   "password": "string",
   "phone": "string"
 }
+
+
+### 이메일 인증
+GET http://localhost:8080/users/signup/eamil-auth?id=26de197a-12cf-40ae-8091-ca3236f3bbd4
+Content-Type: application/json
 
 ### 로그인
 POST http://localhost:8080/users/signIn
 Content-Type: application/json
 
 {
-  "email": "bravo352@naver.com",
+  "email": "thgml352@gmail.com",
   "password": "string"
 }
