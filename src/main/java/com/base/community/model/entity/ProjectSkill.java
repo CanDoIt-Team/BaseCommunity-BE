@@ -1,7 +1,7 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.ProjectSkillDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,7 +19,7 @@ public class ProjectSkill {
 
     private String name;
 
-    @JsonIgnore
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;

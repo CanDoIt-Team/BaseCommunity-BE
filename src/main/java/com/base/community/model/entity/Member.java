@@ -2,6 +2,7 @@ package com.base.community.model.entity;
 
 import com.base.community.dto.SignUpDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 
@@ -58,9 +59,10 @@ public class Member extends BaseEntity{
     private String urlFilename;  //파일주소
 
 
-    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
+    @Builder.Default
     private List<MemberSkills> skills = new ArrayList<>();
 
 

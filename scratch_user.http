@@ -1,0 +1,21 @@
+### 회원가입
+POST http://localhost:8080/users/signUp
+Content-Type: application/json
+
+{
+  "birth": "2022-10-25",
+  "email": "bravo352@naver.com",
+  "name": "소희",
+  "nickname": "닉네임",
+  "password": "string",
+  "phone": "string"
+}
+
+### 로그인
+POST http://localhost:8080/users/signIn
+Content-Type: application/json
+
+{
+  "email": "bravo352@naver.com",
+  "password": "string"
+}

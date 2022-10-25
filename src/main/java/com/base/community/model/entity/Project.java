@@ -1,7 +1,7 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.ProjectDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 
@@ -23,7 +23,9 @@ public class Project extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long leaderId;
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member leader;
 
     @NotBlank(message = "제목은 필수 입력 값입니다.")
     private String title;
@@ -38,7 +40,7 @@ public class Project extends BaseEntity{
     // 마감 여부
     private boolean isComplete;
 
-    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
     private List<ProjectSkill> projectSkills = new ArrayList<>();

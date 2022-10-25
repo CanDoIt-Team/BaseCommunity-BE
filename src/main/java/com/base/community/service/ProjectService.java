@@ -10,6 +10,8 @@ import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.ProjectRepository;
 import com.base.community.model.repository.ProjectSkillRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,18 +28,27 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectSkillRepository projectSkillRepository;
 
+    public Page<Project> getProject(Pageable pageable) {
+        return projectRepository.findAll(pageable);
+    }
+
+    public Project getProjectDetail(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+    }
+
     @Transactional
     public Project createProject(Long memberId, ProjectDto parameter) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-        Optional<Project> projectOptional = projectRepository.findByLeaderId(memberId);
+        Optional<Project> projectOptional = projectRepository.findByLeader(member);
         if (projectOptional.isPresent()) {
             throw new CustomException(ALREADY_PROJECT_CREATE);
         }
 
         Project project = projectRepository.save(Project.of(parameter));
-        project.setLeaderId(memberId);
+        project.setLeader(member);
 
         return project;
     }
@@ -47,7 +58,7 @@ public class ProjectService {
         var project = projectRepository.findById(parameter.getId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
 
-        if (!Objects.equals(project.getLeaderId(), memberId)) { // 작성자만 수정 가능
+        if (!Objects.equals(project.getLeader().getId(), memberId)) { // 작성자만 수정 가능
             throw new CustomException(NOT_VALID_USER);
         }
 
@@ -64,12 +75,6 @@ public class ProjectService {
         project.setContent(parameter.getContent());
         project.setMaxTotal(parameter.getMaxTotal());
 
-        // 해당 유저에 맞는 프로젝트 스킬 다 삭제 후 다시 넣음
-        Iterable<ProjectSkill> projectSkills = projectSkillRepository.findByProject(project);
-        for (ProjectSkill skill: projectSkills) {
-            projectSkillRepository.deleteById(skill.getId());
-        }
-
         for (ProjectSkillDto dto: parameter.getProjectSkills()) {
             ProjectSkill projectSkill = ProjectSkill.of(dto);
             project.getProjectSkills().add(projectSkill);
@@ -84,7 +89,7 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(NOT_VALID_USER));
 
         // 프로젝트 생성자 인지 확인
-        Project project = projectRepository.findByLeaderId(memberId)
+        Project project = projectRepository.findByLeader(member)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
         if (!Objects.equals(project.getId(), projectId)) {
             throw new CustomException(NOT_LEADER_PROJECT);
@@ -94,5 +99,12 @@ public class ProjectService {
         projectRepository.delete(project);
 
         return "삭제가 완료되었습니다.";
+    }
+
+    @Transactional
+    public void deleteProjectSkill(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+        projectSkillRepository.deleteByProject(project);
     }
 }

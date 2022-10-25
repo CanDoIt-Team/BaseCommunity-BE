@@ -1,7 +1,6 @@
 package com.base.community.model.entity;
 
-import com.base.community.dto.AddMemberSkillsDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,8 +21,7 @@ public class MemberSkills extends BaseEntity{
     @NotBlank
     private String name;
 
-
-    @JsonIgnore
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;

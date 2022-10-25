@@ -1,7 +1,7 @@
 ### 프로젝트 등록
 POST http://localhost:8080/projects
 Content-Type: application/json
-X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2NDU3OTM0LCJleHAiOjE2NjY0NjE1MzR9.yu9eiKxcy6HFwEGtgyaxbyIrddvCyv_Dc3b5gLuoget8n_uPiUTw2hWUhu4m0hmxW9BWAsiUinCgLlQIjbnUlA
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicmF2bzM1MkBuYXZlci5jb20iLCJqdGkiOiIyIiwiaWF0IjoxNjY2Njk4NjYzLCJleHAiOjE2NjY3MDIyNjN9.in8zEne2Beheke2oAuQIfng2DSN9svT6pAEUY4Z0PbQHGFdIyiKW8EVO3u34Pc01htdIu-FZJw-bpxBRbVp27w
 
 {
   "content": "내용",
@@ -32,7 +32,11 @@ X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiO
   "projectSkills": [
     {
       "id": 0,
-      "name": "Django"
+      "name": "java"
+    },
+    {
+      "id": 0,
+      "name": "spring"
     }
   ],
   "title": "string"
@@ -42,3 +46,7 @@ X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiO
 DELETE http://localhost:8080/projects/1
 Content-Type: application/json
 X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2NDU3OTM0LCJleHAiOjE2NjY0NjE1MzR9.yu9eiKxcy6HFwEGtgyaxbyIrddvCyv_Dc3b5gLuoget8n_uPiUTw2hWUhu4m0hmxW9BWAsiUinCgLlQIjbnUlA
+
+### 프로젝트 스킬 삭제
+DELETE http://localhost:8080/projects/2/skill
+Content-Type: application/json
