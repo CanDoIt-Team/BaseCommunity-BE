@@ -1,35 +1,32 @@
 package com.base.community.model.entity;
 
+import com.base.community.dto.ProjectSkillDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.util.List;
 
-@Entity
 @Getter
 @Setter
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberSkills extends BaseEntity{
+public class ProjectSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String name;
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    public static MemberSkills of(List<String> name) {
-        return MemberSkills.builder()
-                .name(String.valueOf(name))
+    public static ProjectSkill of(ProjectSkillDto form) {
+        return ProjectSkill.builder()
+                .name(form.getName())
                 .build();
     }
-
 }
