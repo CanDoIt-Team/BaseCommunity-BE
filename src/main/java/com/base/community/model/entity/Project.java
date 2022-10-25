@@ -7,6 +7,7 @@ import org.hibernate.envers.AuditOverride;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +34,10 @@ public class Project extends BaseEntity{
     @NotBlank(message = "내용은 필수 입력 값입니다.")
     private String content;
 
+    private LocalDate startDate;
+
+    private String developPeriod;
+
     private Integer maxTotal;
 
     private Integer nowTotal;
@@ -43,6 +48,7 @@ public class Project extends BaseEntity{
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
+    @Builder.Default
     private List<ProjectSkill> projectSkills = new ArrayList<>();
 
     public static Project of(ProjectDto dto) {
