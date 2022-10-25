@@ -221,6 +221,7 @@ public class MemberService implements UserDetailsService {
             throw new CustomException(NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
+        member.setNickname(form.getNickname());
         member.setPhone(form.getPhone());
         member.setBirth(form.getBirth());
 
