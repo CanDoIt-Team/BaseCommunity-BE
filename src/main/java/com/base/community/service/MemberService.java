@@ -45,10 +45,10 @@ public class MemberService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Value("${dir.LocalPath}")
-    String baseLocalPath;
+    private String baseLocalPath;
 
     @Value("${dir.UrlPath}")
-    String baseUrlPath;
+    private String baseUrlPath;
 
 
     @Transactional
