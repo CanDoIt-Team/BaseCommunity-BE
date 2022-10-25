@@ -13,9 +13,18 @@ public enum ErrorCode {
     NOT_FOUND_USER(HttpStatus.BAD_REQUEST, "일치하는 회원이 없습니다."),
 
     NOT_VALID_DATE(HttpStatus.BAD_REQUEST,"유효한 날짜가 아닙니다."),
-    NOT_FOUND_SKILL(HttpStatus.BAD_REQUEST, "???"),
+    NOT_FOUND_SKILL(HttpStatus.BAD_REQUEST, "스킬이 존재하지 않습니다."),
 
-    PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.")
+    PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+
+    ALREADY_PROJECT_CREATE(HttpStatus.BAD_REQUEST, "프로젝트를 이미 등록하였습니다."),
+    ALREADY_PROJECT_MAX_TOTAL_FULL(HttpStatus.BAD_REQUEST, "모집 정원을 초과하였습니다."),
+    ALREADY_PROJECT_RECRUIT_END(HttpStatus.BAD_REQUEST, "이미 프로젝트 모집을 완료 하였습니다."),
+    NOT_VALID_USER(HttpStatus.BAD_REQUEST, "업데이트 권한이 없는 회원 입니다."),
+    ALREADY_PROJECT_COMPLETE(HttpStatus.BAD_REQUEST, "마감한 프로젝트는 수정할 수 없습니다."),
+    NOT_VALID_MAX_TOTAL(HttpStatus.BAD_REQUEST, "현재 신청한 인원보다 모집 인원의 수가 더 많아야 합니다."),
+    NOT_FOUND_PROJECT(HttpStatus.BAD_REQUEST, "일치하는 프로젝트가 없습니다."),
+    NOT_LEADER_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트 생성자가 아닙니다.")
     ;
 
     private final HttpStatus httpStatus;

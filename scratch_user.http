@@ -11,6 +11,7 @@ Content-Type: application/json
   "phone": "string"
 }
 
+
 ### 이메일 인증
 GET http://localhost:8080/users/signup/eamil-auth?id=26de197a-12cf-40ae-8091-ca3236f3bbd4
 Content-Type: application/json
