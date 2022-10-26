@@ -1,6 +1,8 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.SignUpDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 
@@ -25,6 +27,7 @@ import static com.base.community.type.MemberCode.MEMBER_STATUS_REQ;
 public class Member extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
@@ -52,9 +55,16 @@ public class Member extends BaseEntity{
     private String changePasswordKey;
     private LocalDateTime changePasswordLimitDt;
 
+    private String filename; //파일이름
+    private String urlFilename;  //파일주소
+
+
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "member_id")
-    private List<UserSkills> skills = new ArrayList<>();
+    @Builder.Default
+    private List<MemberSkills> skills = new ArrayList<>();
+
 
     public static Member from(SignUpDto dto) {
         return Member.builder()
