@@ -14,6 +14,9 @@ public enum ErrorCode {
     NOT_VALID_DATE(HttpStatus.BAD_REQUEST,"유효한 날짜가 아닙니다."),
     NOT_FOUND_SKILL(HttpStatus.BAD_REQUEST, "스킬이 존재하지 않습니다."),
     PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    NOT_AUTHENTICATE_USER(HttpStatus.BAD_REQUEST,"이메일 인증이 필요합니다."),
+    WITHDRAW_USER(HttpStatus.BAD_REQUEST,"탈퇴한 회웝입니다."),
+
 
     ALREADY_PROJECT_CREATE(HttpStatus.BAD_REQUEST, "프로젝트를 이미 등록하였습니다."),
     ALREADY_PROJECT_MAX_TOTAL_FULL(HttpStatus.BAD_REQUEST, "모집 정원을 초과하였습니다."),
