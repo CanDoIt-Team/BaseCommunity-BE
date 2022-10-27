@@ -1,7 +1,6 @@
 package com.base.community.model.entity;
 
 import com.base.community.dto.SignUpDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;

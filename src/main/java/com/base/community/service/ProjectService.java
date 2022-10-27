@@ -28,7 +28,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectSkillRepository projectSkillRepository;
 
-    public Page<Project> getProject(Pageable pageable) {
+    public Page<Project> getProject(final Pageable pageable) {
         return projectRepository.findAll(pageable);
     }
 
@@ -74,6 +74,8 @@ public class ProjectService {
         project.setTitle(parameter.getTitle());
         project.setContent(parameter.getContent());
         project.setMaxTotal(parameter.getMaxTotal());
+        project.setDevelopPeriod(parameter.getDevelopPeriod());
+        project.setStartDate(parameter.getStartDate());
 
         for (ProjectSkillDto dto: parameter.getProjectSkills()) {
             ProjectSkill projectSkill = ProjectSkill.of(dto);
@@ -102,9 +104,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteProjectSkill(Long projectId) {
+    public String deleteProjectSkill(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
         projectSkillRepository.deleteByProject(project);
+        return "삭제가 완료되었습니다.";
     }
 }
