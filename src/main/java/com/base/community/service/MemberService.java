@@ -224,7 +224,7 @@ public class MemberService implements UserDetailsService {
 
 
     // 멤버정보 업데이트
-    public Member updateMember(Long id, MemberDto form) {
+    public Member updateMember(Long id, UpdateMemberDto form) {
         form.setId(id);
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
@@ -248,6 +248,8 @@ public class MemberService implements UserDetailsService {
     }
 
 
+
+    //마이페이지 - 스킬 삭제
     public String deleteSkill(Long memberId, Long skillId) {
         MemberSkills memberSkills = memberSkillsRepository.findByMemberIdAndId(memberId, skillId)
                 .orElseThrow(()->new CustomException(NOT_FOUND_SKILL));
@@ -259,6 +261,8 @@ public class MemberService implements UserDetailsService {
 
 
 
+
+    //프로필 업데이트
     public Member uploadProfileImg(Long id, MultipartFile file) {
 
         MemberDto form = new MemberDto();
@@ -298,6 +302,8 @@ public class MemberService implements UserDetailsService {
 
     }
 
+
+    //회원탈퇴
     public String deleteMember(Long id) {
         MemberDto form = new MemberDto();
         form.setId(id);
