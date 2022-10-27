@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ProjectSkillDto {
+public class ProjectCommentDto {
     private Long id;
-    private String name;
+    private Long projectId;
+    private String content;
 }

@@ -1,7 +1,7 @@
 ### 프로젝트 등록
 POST http://localhost:8080/projects
 Content-Type: application/json
-X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicmF2bzM1MkBuYXZlci5jb20iLCJqdGkiOiIyIiwiaWF0IjoxNjY2Njk4NjYzLCJleHAiOjE2NjY3MDIyNjN9.in8zEne2Beheke2oAuQIfng2DSN9svT6pAEUY4Z0PbQHGFdIyiKW8EVO3u34Pc01htdIu-FZJw-bpxBRbVp27w
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2ODc2MTcyLCJleHAiOjE2NjY4Nzk3NzJ9.WOuSuaw4zZ1hYyKmgWALlcZY1nxXm3woJTbzp1O4r0VXsHJqZs0nUrSfrtAbJ0AskXTI_q563hKMnyfiiPcTnA
 
 {
   "content": "내용",
@@ -49,4 +49,29 @@ X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiO
 
 ### 프로젝트 스킬 삭제
 DELETE http://localhost:8080/projects/2/skill
+Content-Type: application/json
+
+### 프로젝트 댓글 추가
+POST http://localhost:8080/projects/1/comments
+Content-Type: application/json
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2ODc2MTcyLCJleHAiOjE2NjY4Nzk3NzJ9.WOuSuaw4zZ1hYyKmgWALlcZY1nxXm3woJTbzp1O4r0VXsHJqZs0nUrSfrtAbJ0AskXTI_q563hKMnyfiiPcTnA
+
+{
+  "content": "끝나는 날이 언제인가요?",
+  "projectId": 1
+}
+
+### 프로젝트 댓글 수정
+PUT http://localhost:8080/projects/1/comments
+Content-Type: application/json
+X-AUTH-TOKEN: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGdtbDM1MkBnbWFpbC5jb20iLCJqdGkiOiIxIiwiaWF0IjoxNjY2ODc2MTcyLCJleHAiOjE2NjY4Nzk3NzJ9.WOuSuaw4zZ1hYyKmgWALlcZY1nxXm3woJTbzp1O4r0VXsHJqZs0nUrSfrtAbJ0AskXTI_q563hKMnyfiiPcTnA
+
+{
+  "id": 1,
+  "content": "업데이트!!",
+  "projectId": 1
+}
+
+### 프로젝트 댓글 삭제
+DELETE http://localhost:8080/projects/comments/2
 Content-Type: application/json

@@ -51,6 +51,12 @@ public class Project extends BaseEntity{
     @Builder.Default
     private List<ProjectSkill> projectSkills = new ArrayList<>();
 
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id")
+    @Builder.Default
+    private List<ProjectComment> projectComments = new ArrayList<>();
+
     public static Project of(ProjectDto dto) {
         return Project.builder()
                 .title(dto.getTitle())
@@ -61,6 +67,8 @@ public class Project extends BaseEntity{
                         .collect(Collectors.toList()))
                 .nowTotal(0)
                 .isComplete(false)
+                .startDate(dto.getStartDate())
+                .developPeriod(dto.getDevelopPeriod())
                 .build();
     }
 }

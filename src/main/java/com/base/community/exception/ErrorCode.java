@@ -23,6 +23,7 @@ public enum ErrorCode {
     NOT_VALID_MAX_TOTAL(HttpStatus.BAD_REQUEST, "현재 신청한 인원보다 모집 인원의 수가 더 많아야 합니다."),
     NOT_FOUND_PROJECT(HttpStatus.BAD_REQUEST, "일치하는 프로젝트가 없습니다."),
     NOT_LEADER_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트 생성자가 아닙니다."),
+    NOT_FOUND_PROJECT_COMMENT(HttpStatus.BAD_REQUEST, "프로젝트 댓글이 존재하지 않습니다."),
     
     NOT_FOUND_BOARD(HttpStatus.BAD_REQUEST, "조회할 게시판 목록이 없습니다."),
     NOT_AUTHORITY_BOARD_MODIFY(HttpStatus.BAD_REQUEST, "게시글을 수정할 권한이 없습니다."),
