@@ -1,9 +1,7 @@
 package com.base.community.service;
 
 
-import com.base.community.dto.BoardCommentDto;
-import com.base.community.dto.BoardDto;
-import com.base.community.dto.BoardListResDto;
+import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
 import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.*;
@@ -36,7 +34,6 @@ public class BoardService {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
-
         if (category == null) { //전체 조회
             boards = boardRepository.findAll(pageRequest);
         } else { //카테고리 조회
@@ -44,6 +41,38 @@ public class BoardService {
         }
 
         return makeList(boards);
+    }
+
+
+    // 내가 작성한 글 목록
+    @Transactional
+    public Map<String, Object> myBoardList(Long memberId, int page){
+
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        Page<BoardEntity> boards;
+
+        boards = boardRepository.findByMemberId(memberId, pageRequest);
+        return makeList(boards);
+
+    }
+
+    // 내가 좋아요한 글 목록
+    @Transactional
+    public Map<String, Object> myHeartList(Long memberId, int page){
+
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        List <HeartEntity> hearts = heartRepository.findByMemberId(memberId);
+
+        List <Long> boardIdList = new ArrayList<>();
+
+        for (HeartEntity heart: hearts) {
+            boardIdList.add(heart.getBoardId());
+        }
+
+        Page<BoardEntity> boards = boardRepository.findByIdIn(boardIdList, pageRequest);
+
+        return makeList(boards);
+
     }
 
     private Map<String, Object> makeList(Page<BoardEntity> boards) {
@@ -58,6 +87,7 @@ public class BoardService {
         List<BoardListResDto> list = new ArrayList<>();
         for (BoardEntity boardEntity : boards) {
             BoardListResDto boardListResDto = BoardListResDto.builder()
+                    .boardId(boardEntity.getId())
                     .category(boardEntity.getCategory())
                     .title(boardEntity.getTitle())
                     .nickname(boardEntity.getMember().getNickname())
@@ -134,7 +164,6 @@ public class BoardService {
         return boardCommentEntity.getId();
     }
 
-
     //게시글 댓글수정
     @Transactional
     public Long modifyComment(BoardCommentDto dto, Long memberId,Long commentId) {
@@ -150,7 +179,6 @@ public class BoardService {
 
     }
 
-
     //게시글 댓글삭제
     @Transactional
     public void deleteComment(Long memberId, Long commentId) {
@@ -161,7 +189,37 @@ public class BoardService {
             throw new CustomException(NOT_AUTHORITY_COMMENT_DELETE);
         }
 
+    }
 
+    // 게시글 상세보기
+    public BoardDetailDto boardDetail(Long boardId) {
+
+       BoardEntity board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
+
+       List<BoardCommentDetailDto> commentList = new ArrayList<>();
+        for (BoardCommentEntity boardCommentEntity: board.getComments()) {
+            BoardCommentDetailDto comment = BoardCommentDetailDto.builder()
+                    .commentId(boardCommentEntity.getId())
+                    .memberId(boardCommentEntity.getMember().getId())
+                    .nickname(boardCommentEntity.getMember().getNickname())
+                    .content(boardCommentEntity.getContent())
+                    .createAt(boardCommentEntity.getCreatedAt())
+                    .updateAt(boardCommentEntity.getModifiedAt())
+                    .build();
+
+            commentList.add(comment);
+        }
+
+       return BoardDetailDto.builder()
+                .category(board.getCategory())
+                .title(board.getTitle())
+                .nickname(board.getMember().getNickname())
+                .content(board.getContent())
+                .createAt(board.getCreatedAt())
+                .updateAt(board.getModifiedAt())
+                .comments(commentList)
+                .build();
 
     }
 }
