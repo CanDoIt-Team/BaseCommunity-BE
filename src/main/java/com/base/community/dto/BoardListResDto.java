@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BoardListResDto {
 
+    private Long boardId;
     private String category;
     private String title;
     private String nickname;
