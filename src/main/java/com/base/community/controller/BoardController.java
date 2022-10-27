@@ -3,7 +3,6 @@ package com.base.community.controller;
 
 import com.base.community.dto.BoardCommentDto;
 import com.base.community.dto.BoardDto;
-import com.base.community.model.entity.Member;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.BoardService;
 import lombok.AllArgsConstructor;
@@ -24,6 +23,30 @@ public class BoardController {
 
          return ResponseEntity.ok(boardService.boardList(category, page-1));
    }
+
+   // 게시글 상세보기
+    @GetMapping("/{boardId}")
+    public ResponseEntity boardDetail(@PathVariable Long boardId){
+
+        return ResponseEntity.ok(boardService.boardDetail(boardId));
+    }
+
+   // 내가 작성한 게시글 목록 보기
+    @GetMapping("/myBoardList")
+    public ResponseEntity myBoardList(@RequestHeader(name = "auth-token") String token,
+                                    @RequestParam(defaultValue = "1") int page){
+
+        return ResponseEntity.ok(boardService.myBoardList(tokenProvider.getUser(token).getId(), page-1));
+    }
+
+    // 내가 좋아요한 게시글 목록 보기
+    @GetMapping("/myHeartList")
+    public ResponseEntity myHeartList(@RequestHeader(name = "auth-token") String token,
+                                      @RequestParam(defaultValue = "1") int page){
+
+        return ResponseEntity.ok(boardService.myHeartList(tokenProvider.getUser(token).getId(), page-1));
+    }
+
 
     // 게시글 작성
     @PostMapping()

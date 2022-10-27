@@ -4,11 +4,14 @@ package com.base.community.model.entity;
 import com.base.community.dto.BoardDto;
 import com.base.community.dto.SignUpDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.base.community.type.MemberCode.MEMBER_STATUS_REQ;
@@ -41,6 +44,11 @@ public class BoardEntity extends BaseEntity{
     @NotBlank
     private String content;
 
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "board_id")
+    @Builder.Default
+    private List<BoardCommentEntity> comments = new ArrayList<>();
 
     public static BoardEntity from(BoardDto dto , Member member) {
         return BoardEntity.builder()
