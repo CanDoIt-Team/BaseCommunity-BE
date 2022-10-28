@@ -12,7 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class UpdateMemberDto {
     private Long id;
+    private String Nickname;
     private LocalDate birth;
     private String phone;
-    private List<AddMemberSkillsDto> skills;
+    private List<MemberSkillsDto> skills;
 }

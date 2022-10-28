@@ -1,5 +1,6 @@
 package com.base.community.model.entity;
 
+import com.base.community.dto.MemberSkillsDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
@@ -26,9 +27,10 @@ public class MemberSkills extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public static MemberSkills of(List<String> name) {
+
+    public static MemberSkills of(MemberSkillsDto form) {
         return MemberSkills.builder()
-                .name(String.valueOf(name))
+                .name(form.getName())
                 .build();
     }
 

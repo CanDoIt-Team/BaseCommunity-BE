@@ -25,39 +25,52 @@ public class AuthController {
     private final MemberService memberService;
     private final TokenProvider tokenProvider;
 
+
+    //회원가입
     @PostMapping("/signup")
     public ResponseEntity<Member> signup(@RequestBody SignUpDto member) {
         Member result = this.memberService.signup(member);
         return ResponseEntity.ok(result);
     }
 
+
+    //회원가입 - 이메일체크
     @GetMapping("/check/email")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(this.memberService.checkEmail(email));
     }
 
+    //회원가입 - 닉네임 체크
     @GetMapping("/check/nickname")
     public ResponseEntity<Boolean> checkNickName(@RequestParam String nickname) {
         return ResponseEntity.ok(this.memberService.checkNickName(nickname));
     }
 
+
+    //회원가입 - 이메일 인증
     @GetMapping("/email-auth")
     public ResponseEntity<Boolean> emailAuth(@RequestParam String id) {
         return ResponseEntity.ok(this.memberService.emailAuth(id));
     }
 
-
+    //로그인페이지 - 비밀번호변경(회원정보 입력)
     @PostMapping("/password/user-info")
     public ResponseEntity<Boolean> findPassword(@RequestBody ChangePasswordDto form) {
+
+
         return ResponseEntity.ok(this.memberService.findPassword(form));
     }
 
-
+    //로그인페이지 - 비밀번호변경(새 비밀번호 입력)
     @PostMapping("/password/new")
-    public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordDto form,@RequestParam String uuid){
-        return ResponseEntity.ok(this.memberService.changePassword(uuid, form));
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto form,@RequestParam String uuid){
+
+        String result =  memberService.changePassword(uuid, form);
+        return ResponseEntity.ok(result);
     }
 
+
+    //로그인
     @PostMapping("/signin")
     public  ResponseEntity<?> signIn(@RequestBody SignInDto request){
         var member = this.memberService.authenticate(request);
@@ -67,55 +80,67 @@ public class AuthController {
 
     }
 
+
+    //회원정보
     @GetMapping("/info")
-    public ResponseEntity<MemberDto> getInfo(@RequestHeader(name = "auth-token") String token){
-        User u = tokenProvider.getUser(token);
-        Member m = memberService.findByIdAndEmail(u.getId(),u.getEmail()).orElseThrow(
-                ()->new CustomException(ErrorCode.NOT_FOUND_USER));
-        return ResponseEntity.ok(MemberDto.from(m));
+    public ResponseEntity<?> getInfo(@RequestHeader(name = "auth-token") String token){
+        Member member = memberService.getMemberDetail(tokenProvider.getUser(token));
+        return ResponseEntity.ok(member);
     }
 
+
+    // 회원정보 수정
     @PostMapping("/info")
-    public ResponseEntity<MemberDto> updateInfo(@RequestHeader(name = "auth-token") String token,
-                                                @RequestBody MemberDto form, @RequestParam(name = "skill",required = false) List<String> skillList) {
-
-        return ResponseEntity.ok(MemberDto.from(memberService.updateMember(tokenProvider.getUser(token).getId(),form, skillList)));
-
+    public ResponseEntity<Member> updateInfo(@RequestHeader(name = "auth-token") String token,
+                                                @RequestBody UpdateMemberDto form) {
+        Member member = memberService.updateMember(tokenProvider.getUser(token).getId(),form);
+        return ResponseEntity.ok(member);
     }
 
+
+    //인포페이지 비밀번호 변경
     @PutMapping("/password/change")
-    public ResponseEntity<Boolean> updateMember(@RequestHeader(name = "auth-token") String token,
+    public ResponseEntity<String> updateMember(@RequestHeader(name = "auth-token") String token,
                                                 @RequestBody InfoChangePasswordDto form) {
-        User u = tokenProvider.getUser(token);
-        form.setId(u.getId());
-        return ResponseEntity.ok(this.memberService.changePassword(form));
+
+        String result = memberService.changeInfoPassword(tokenProvider.getUser(token).getId(), form);
+        return ResponseEntity.ok(result);
     }
 
+
+    // 마이페이지 - 스킬 삭제
     @DeleteMapping("/info")
-    public ResponseEntity<Void> deleteSkill(@RequestHeader(name = "auth-token") String token,
+    public ResponseEntity<String> deleteSkill(@RequestHeader(name = "auth-token") String token,
                                             @RequestParam Long id) {
-        memberService.deleteSkill(tokenProvider.getUser(token).getId(), id);
+        String result = memberService.deleteSkill(tokenProvider.getUser(token).getId(), id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(result);
     }
 
 
+
+    //마이페이지 - 프로필 이미지 수정
     @PostMapping("/profile-img")
-    public ResponseEntity<MemberDto> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
+    public ResponseEntity<Member> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
                                                       @RequestPart MultipartFile file){
+        Member member = memberService.uploadProfileImg(tokenProvider.getUser(token).getId(),file);
 
-        return ResponseEntity.ok(MemberDto.from(memberService.uploadProfileImg(tokenProvider.getUser(token).getId(),file)));
+        return ResponseEntity.ok(member);
+
     }
 
 
+
+    //회원탈퇴
     @DeleteMapping("/withdraw")
-    public ResponseEntity<Void> deleteMember(@RequestHeader(name = "auth-token", required = false) String token) {
-        memberService.deleteMember(tokenProvider.getUser(token).getId());
+    public ResponseEntity<String> deleteMember(@RequestHeader(name = "auth-token", required = false) String token) {
+        String result = memberService.deleteMember(tokenProvider.getUser(token).getId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(result);
     }
 
 
+    //로그아웃
     @GetMapping("/signout")
     public String logout(HttpSession session){
         session.invalidate();

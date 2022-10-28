@@ -51,6 +51,8 @@ public class MemberService implements UserDetailsService {
     private String baseUrlPath;
 
 
+
+    //회원가입
     @Transactional
     public Member signup(SignUpDto signUpDto) {
         if (this.memberRepository.existsByEmail(signUpDto.getEmail())) {
@@ -76,19 +78,24 @@ public class MemberService implements UserDetailsService {
                         + "<a target='_blank' href='http://localhost:3000/users/email-auth?id="
                         + uuid + "'> 가입 완료 </a></div>")
                 .build();
+        log.info(signUpDto.getEmail()+"회원 인증 이메일 발송완료");
         mailComponent.sendEmail(mailDto);
 
         return member;
     }
 
+
+    //회원가입 - 닉네임 체크
     public boolean checkNickName(String nickname) {
         return this.memberRepository.existsByNickname(nickname);
     }
 
+    //회원가입 - 이메일 체크
     public boolean checkEmail(String email) {
         return this.memberRepository.existsByEmail(email);
     }
 
+    //회원가입 - 이메일 인증
     public boolean emailAuth(String uuid) {
         Optional<Member> optionalMember = this.memberRepository.findByEmailAuthKey(uuid);
         if (optionalMember.isEmpty()) {
@@ -107,6 +114,7 @@ public class MemberService implements UserDetailsService {
 
         return true;
     }
+
     //로그인 페이지(비밀번호 재설정-유저 정보 입력)
     public boolean findPassword(ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository
@@ -128,13 +136,13 @@ public class MemberService implements UserDetailsService {
                         + "<div><a target='_blank' href='http://localhost:3000/password/new?uuid="
                         + uuid + "'> 비밀번호 재설정 링크 </a></div>")
                 .build();
-
+        log.info(form.getEmail()+"회원 비밀번호 변경 이메일 발송완료");
         mailComponent.sendEmail(mailDto);
 
         return true;
     }
     //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
-    public boolean changePassword(String uuid, ChangePasswordDto form) {
+    public String changePassword(String uuid, ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
 
         if (!optionalMember.isPresent()) {
@@ -155,8 +163,9 @@ public class MemberService implements UserDetailsService {
         member.setChangePasswordLimitDt(null);
         memberRepository.save(member);
 
-        return true;
+        return "비밀번호 변경이 완료됐습니다.";
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -166,27 +175,42 @@ public class MemberService implements UserDetailsService {
 
 
     //로그인
-    public Member authenticate(SignInDto member) {
-
-        var user = this.memberRepository.findByEmail(member.getEmail())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
-
-        if (!this.passwordEncoder.matches(member.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+    public Member authenticate(SignInDto form) {
+        Optional<Member> optionalMember = memberRepository.findByEmail(form.getEmail());
+        if (optionalMember.isEmpty()) {
+            throw new CustomException(NOT_FOUND_USER);
         }
-        return user;
+        Member member = optionalMember.get();
+        if(!this.passwordEncoder.matches(form.getPassword(), member.getPassword())){
+            throw new CustomException(PASSWORD_NOT_MATCH);
+        }
+        if(member.getUserStatus().equals("REQ")){
+            throw new CustomException(NOT_AUTHENTICATE_USER);
+        }
+        if(member.getUserStatus().equals("WITHDRAW")){
+            throw new CustomException(WITHDRAW_USER);
+        }
+//        var user = this.memberRepository.findByEmail(form.getEmail())
+//                .orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
+//
+//        if (!this.passwordEncoder.matches(form.getPassword(), user.getPassword())) {
+//            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+//        }
+        return member;
     }
 
-    public Optional<Member> findByIdAndEmail(Long id, String email) {
-        return memberRepository.findById(id)
-                .stream().filter(member -> member.getEmail().equals(email))
-                .findFirst();
+
+
+    //마이페이지 - 회원정보 가져오기
+    public Member getMemberDetail(User user) {
+        return memberRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
     }
 
 
-    //마이페이지 (비밀번호 재설정)
-    public boolean changePassword(InfoChangePasswordDto form) {
-        Optional<Member> optionalMember = memberRepository.findById(form.getId());
+    //마이페이지 -비밀번호 재설정
+    public String changeInfoPassword(Long id, InfoChangePasswordDto form) {
+        Optional<Member> optionalMember = memberRepository.findById(id);
         if (!optionalMember.isPresent()) {
             throw new CustomException(NOT_FOUND_USER);
         }
@@ -195,55 +219,50 @@ public class MemberService implements UserDetailsService {
         member.setPassword(encPassword);
         memberRepository.save(member);
 
-        return true;
+        return "비밀번호 변경이 완료됐습니다.";
     }
 
 
+    // 멤버정보 업데이트
     public Member updateMember(Long id, UpdateMemberDto form) {
-        Optional<Member> optionalMember = memberRepository.findById(form.getId());
-        if (optionalMember.isEmpty()) {
-            throw new CustomException(NOT_FOUND_USER);
-        }
-        Member member = optionalMember.get();
-        member.setPhone(form.getPhone());
-        member.setBirth(form.getBirth());
-        memberRepository.save(member);
-
-        return member;
-    }
-
-
-    //멤버정보 업데이트
-    public Member updateMember(Long id, MemberDto form, List<String> skillList) {
         form.setId(id);
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
             throw new CustomException(NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
+
+
         member.setNickname(form.getNickname());
         member.setPhone(form.getPhone());
         member.setBirth(form.getBirth());
 
-        if(skillList != null){
-            MemberSkills memberSkills = MemberSkills.of(skillList);
+        for(MemberSkillsDto dto : form.getSkills()) {
+            MemberSkills memberSkills = MemberSkills.of(dto);
             member.getSkills().add(memberSkills);
         }
 
         memberRepository.save(member);
+
         return member;
     }
 
 
-    public void deleteSkill(Long memberId, Long skillId) {
+
+    //마이페이지 - 스킬 삭제
+    public String deleteSkill(Long memberId, Long skillId) {
         MemberSkills memberSkills = memberSkillsRepository.findByMemberIdAndId(memberId, skillId)
                 .orElseThrow(()->new CustomException(NOT_FOUND_SKILL));
 
         memberSkillsRepository.delete(memberSkills);
+
+        return "스킬 삭제가 완료됐습니다..";
     }
 
 
 
+
+    //프로필 업데이트
     public Member uploadProfileImg(Long id, MultipartFile file) {
 
         MemberDto form = new MemberDto();
@@ -283,7 +302,9 @@ public class MemberService implements UserDetailsService {
 
     }
 
-    public void deleteMember(Long id) {
+
+    //회원탈퇴
+    public String deleteMember(Long id) {
         MemberDto form = new MemberDto();
         form.setId(id);
 
@@ -294,6 +315,8 @@ public class MemberService implements UserDetailsService {
         Member member = optionalMember.get();
 
         memberRepository.delete(member);
+
+        return "회원 탈퇴가 완료되었습니다.";
     }
 
 
@@ -335,7 +358,6 @@ public class MemberService implements UserDetailsService {
 
         return new String[]{newFilename, newUrlFilename};
     }
-
 
 
 
