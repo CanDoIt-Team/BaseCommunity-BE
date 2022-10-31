@@ -5,8 +5,10 @@ import com.base.community.dto.ProjectSkillDto;
 import com.base.community.exception.CustomException;
 import com.base.community.model.entity.Member;
 import com.base.community.model.entity.Project;
+import com.base.community.model.entity.ProjectMember;
 import com.base.community.model.entity.ProjectSkill;
 import com.base.community.model.repository.MemberRepository;
+import com.base.community.model.repository.ProjectMemberRepository;
 import com.base.community.model.repository.ProjectRepository;
 import com.base.community.model.repository.ProjectSkillRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
     private final ProjectSkillRepository projectSkillRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     public Page<Project> getProject(final Pageable pageable) {
         return projectRepository.findAll(pageable);
@@ -62,8 +65,8 @@ public class ProjectService {
             throw new CustomException(NOT_VALID_USER);
         }
 
-        if (project.isComplete()) { // 마감한 프로젝트는 수정 못함
-            throw new CustomException(ALREADY_PROJECT_COMPLETE);
+        if (project.isComplete()) {
+            throw new CustomException(ALREADY_PROJECT_COMPLETE_NOT_UPDATE);
         }
 
         // 현재 프로젝트 신청 인원보다 모집 인원을 적거나 같게 하면 안됨
@@ -77,7 +80,7 @@ public class ProjectService {
         project.setDevelopPeriod(parameter.getDevelopPeriod());
         project.setStartDate(parameter.getStartDate());
 
-        for (ProjectSkillDto dto: parameter.getProjectSkills()) {
+        for (ProjectSkillDto dto : parameter.getProjectSkills()) {
             ProjectSkill projectSkill = ProjectSkill.of(dto);
             project.getProjectSkills().add(projectSkill);
         }
@@ -109,5 +112,38 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
         projectSkillRepository.deleteByProject(project);
         return "삭제가 완료되었습니다.";
+    }
+
+    @Transactional
+    public ProjectMember registerProject(Long memberId, Long projectId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+
+        if (project.isComplete()) {
+            throw new CustomException(ALREADY_PROJECT_COMPLETE);
+        }
+        if (project.getNowTotal() >= project.getMaxTotal()) {
+            throw new CustomException(ALREADY_PROJECT_MAX_TOTAL_FULL);
+        }
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .project(project)
+                .member(member)
+                .accept(false)
+                .build();
+
+        return projectMemberRepository.save(projectMember);
+    }
+
+    @Transactional
+    public ProjectMember acceptProject(Long projectMemberId) {
+        ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
+                .orElseThrow(() -> new CustomException(NOT_VALID_PROJECT_REGISTER_MEMBER));
+
+        projectMember.setAccept(true);
+        return projectMember;
     }
 }
