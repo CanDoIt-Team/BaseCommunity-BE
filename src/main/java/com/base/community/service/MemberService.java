@@ -10,6 +10,11 @@ import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.MemberSkillsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,9 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.base.community.exception.ErrorCode.*;
 import static com.base.community.type.MemberCode.MEMBER_STATUS_ING;
@@ -49,7 +52,6 @@ public class MemberService implements UserDetailsService {
 
     @Value("${dir.UrlPath}")
     private String baseUrlPath;
-
 
 
     //회원가입
@@ -78,7 +80,7 @@ public class MemberService implements UserDetailsService {
                         + "<a target='_blank' href='http://localhost:3000/users/email-auth?id="
                         + uuid + "'> 가입 완료 </a></div>")
                 .build();
-        log.info(signUpDto.getEmail()+"회원 인증 이메일 발송완료");
+        log.info(signUpDto.getEmail() + "회원 인증 이메일 발송완료");
         mailComponent.sendEmail(mailDto);
 
         return member;
@@ -136,11 +138,12 @@ public class MemberService implements UserDetailsService {
                         + "<div><a target='_blank' href='http://localhost:3000/password/new?uuid="
                         + uuid + "'> 비밀번호 재설정 링크 </a></div>")
                 .build();
-        log.info(form.getEmail()+"회원 비밀번호 변경 이메일 발송완료");
+        log.info(form.getEmail() + "회원 비밀번호 변경 이메일 발송완료");
         mailComponent.sendEmail(mailDto);
 
         return true;
     }
+
     //로그인 페이지(비밀번호 재설정-새로운 비밀번호 입력)
     public String changePassword(String uuid, ChangePasswordDto form) {
         Optional<Member> optionalMember = memberRepository.findByChangePasswordKey(uuid);
@@ -181,13 +184,13 @@ public class MemberService implements UserDetailsService {
             throw new CustomException(NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
-        if(!this.passwordEncoder.matches(form.getPassword(), member.getPassword())){
+        if (!this.passwordEncoder.matches(form.getPassword(), member.getPassword())) {
             throw new CustomException(PASSWORD_NOT_MATCH);
         }
-        if(member.getUserStatus().equals("REQ")){
+        if (member.getUserStatus().equals("REQ")) {
             throw new CustomException(NOT_AUTHENTICATE_USER);
         }
-        if(member.getUserStatus().equals("WITHDRAW")){
+        if (member.getUserStatus().equals("WITHDRAW")) {
             throw new CustomException(WITHDRAW_USER);
         }
 //        var user = this.memberRepository.findByEmail(form.getEmail())
@@ -198,7 +201,6 @@ public class MemberService implements UserDetailsService {
 //        }
         return member;
     }
-
 
 
     //마이페이지 - 회원정보 가져오기
@@ -224,7 +226,7 @@ public class MemberService implements UserDetailsService {
 
 
     // 멤버정보 업데이트
-    public Member updateMember(Long id, UpdateMemberDto form) {
+    public Member updateMember(Long id, UpdateMemberDto form, String skill) {
         form.setId(id);
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
@@ -237,29 +239,71 @@ public class MemberService implements UserDetailsService {
         member.setPhone(form.getPhone());
         member.setBirth(form.getBirth());
 
-        for(MemberSkillsDto dto : form.getSkills()) {
-            MemberSkills memberSkills = MemberSkills.of(dto);
-            member.getSkills().add(memberSkills);
+
+        if (!skill.isEmpty()) {
+            log.info(skill + "3############");
+
+            HashSet<String> skillList = new HashSet<>();
+            try {
+                JSONParser parser = new JSONParser();
+                JSONArray json = (JSONArray) parser.parse(skill);
+                json.forEach(item -> {
+                    JSONObject jsonObject = (JSONObject) JSONValue.parse(item.toString());
+                    skillList.add(jsonObject.get("value").toString());
+                });
+
+//                기존 해쉬태그 비교
+                HashSet<MemberSkills> OriginSkills = memberSkillsRepository.findAllByMemberId(form.getId());
+                HashSet<String> OriginSkillsName = new HashSet<>();
+                OriginSkills.forEach(item -> {
+                    OriginSkillsName.add(item.getName());
+                });
+
+
+//                추가된 해쉬태그
+                HashSet<String> addSkills = new HashSet<>(skillList);
+                addSkills.removeAll(OriginSkillsName);
+                if (!addSkills.isEmpty()) {
+                    List<MemberSkillsDto.Request> memberSkillDtoList = new ArrayList<>();
+                    addSkills.forEach(item -> {
+                        MemberSkillsDto.Request memberSkillDto = new MemberSkillsDto.Request();
+                        memberSkillDto.setName(item);
+                        memberSkillDtoList.add(memberSkillDto);
+                    });
+                    SaveAll(form.getId(), memberSkillDtoList);
+                }
+
+//                삭제된 해시태그
+                HashSet<String> SubSkills = new HashSet<>(OriginSkillsName);
+                SubSkills.removeAll(skillList);
+                List<String> setToList = new ArrayList<>(SubSkills);
+
+                if (!SubSkills.isEmpty()) {
+                    DeleteAll(form.getId(), setToList);
+                }
+            } catch (ParseException e) {
+                log.info(e.getMessage());
+            }
         }
-
         memberRepository.save(member);
-
         return member;
     }
 
-
-
-    //마이페이지 - 스킬 삭제
-    public String deleteSkill(Long memberId, Long skillId) {
-        MemberSkills memberSkills = memberSkillsRepository.findByMemberIdAndId(memberId, skillId)
-                .orElseThrow(()->new CustomException(NOT_FOUND_SKILL));
-
-        memberSkillsRepository.delete(memberSkills);
-
-        return "스킬 삭제가 완료됐습니다..";
+    private void DeleteAll(Long id, List<String> skill) {
+        memberSkillsRepository.deleteByMemberIdAndNameIn(id, skill);
     }
 
 
+    private void SaveAll(Long id, List<MemberSkillsDto.Request> memberSkillDtoList) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+        List<MemberSkills> memberSkills = new ArrayList<>();
+        for (int i = 0; i < memberSkillDtoList.size(); i++) {
+            memberSkillDtoList.get(i).setMember(member);
+            memberSkills.add(memberSkillDtoList.get(i).toEntity());
+        }
+        memberSkillsRepository.saveAll(memberSkills);
+    }
 
 
     //프로필 업데이트
@@ -291,7 +335,7 @@ public class MemberService implements UserDetailsService {
         form.setId(id);
 
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
-        if(optionalMember.isEmpty()){
+        if (optionalMember.isEmpty()) {
             throw new CustomException(NOT_FOUND_USER);
         }
         Member member = optionalMember.get();
@@ -318,8 +362,6 @@ public class MemberService implements UserDetailsService {
 
         return "회원 탈퇴가 완료되었습니다.";
     }
-
-
 
 
     private String[] getNewSaveFile(String baseLocalPath, String baseUrlPath, String originalFilename) {
@@ -358,7 +400,5 @@ public class MemberService implements UserDetailsService {
 
         return new String[]{newFilename, newUrlFilename};
     }
-
-
 
 }

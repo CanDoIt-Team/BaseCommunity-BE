@@ -2,8 +2,6 @@ package com.base.community.controller;
 
 
 import com.base.community.dto.*;
-import com.base.community.exception.CustomException;
-import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.Member;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.MemberService;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -63,16 +60,16 @@ public class AuthController {
 
     //로그인페이지 - 비밀번호변경(새 비밀번호 입력)
     @PostMapping("/password/new")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto form,@RequestParam String uuid){
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto form, @RequestParam String uuid) {
 
-        String result =  memberService.changePassword(uuid, form);
+        String result = memberService.changePassword(uuid, form);
         return ResponseEntity.ok(result);
     }
 
 
     //로그인
     @PostMapping("/signin")
-    public  ResponseEntity<?> signIn(@RequestBody SignInDto request){
+    public ResponseEntity<?> signIn(@RequestBody SignInDto request) {
         var member = this.memberService.authenticate(request);
         var token = this.tokenProvider
                 .generateToken(member.getEmail(), member.getId());
@@ -83,7 +80,7 @@ public class AuthController {
 
     //회원정보
     @GetMapping("/info")
-    public ResponseEntity<?> getInfo(@RequestHeader(name = "auth-token") String token){
+    public ResponseEntity<?> getInfo(@RequestHeader(name = "auth-token") String token) {
         Member member = memberService.getMemberDetail(tokenProvider.getUser(token));
         return ResponseEntity.ok(member);
     }
@@ -92,8 +89,9 @@ public class AuthController {
     // 회원정보 수정
     @PostMapping("/info")
     public ResponseEntity<Member> updateInfo(@RequestHeader(name = "auth-token") String token,
-                                                @RequestBody UpdateMemberDto form) {
-        Member member = memberService.updateMember(tokenProvider.getUser(token).getId(),form);
+                                             @RequestBody UpdateMemberDto form, @RequestParam(value = "skill", required = false) String skill) {
+        log.info(skill);
+        Member member = memberService.updateMember(tokenProvider.getUser(token).getId(), form, skill);
         return ResponseEntity.ok(member);
     }
 
@@ -101,34 +99,21 @@ public class AuthController {
     //인포페이지 비밀번호 변경
     @PutMapping("/password/change")
     public ResponseEntity<String> updateMember(@RequestHeader(name = "auth-token") String token,
-                                                @RequestBody InfoChangePasswordDto form) {
+                                               @RequestBody InfoChangePasswordDto form) {
 
         String result = memberService.changeInfoPassword(tokenProvider.getUser(token).getId(), form);
         return ResponseEntity.ok(result);
     }
 
-
-    // 마이페이지 - 스킬 삭제
-    @DeleteMapping("/info")
-    public ResponseEntity<String> deleteSkill(@RequestHeader(name = "auth-token") String token,
-                                            @RequestParam Long id) {
-        String result = memberService.deleteSkill(tokenProvider.getUser(token).getId(), id);
-
-        return ResponseEntity.ok(result);
-    }
-
-
-
     //마이페이지 - 프로필 이미지 수정
     @PostMapping("/profile-img")
     public ResponseEntity<Member> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
-                                                      @RequestPart MultipartFile file){
-        Member member = memberService.uploadProfileImg(tokenProvider.getUser(token).getId(),file);
+                                                   @RequestPart MultipartFile file) {
+        Member member = memberService.uploadProfileImg(tokenProvider.getUser(token).getId(), file);
 
         return ResponseEntity.ok(member);
 
     }
-
 
 
     //회원탈퇴
@@ -142,7 +127,7 @@ public class AuthController {
 
     //로그아웃
     @GetMapping("/signout")
-    public String logout(HttpSession session){
+    public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
