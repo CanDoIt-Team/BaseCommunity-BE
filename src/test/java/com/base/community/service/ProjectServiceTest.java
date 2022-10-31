@@ -2,11 +2,9 @@ package com.base.community.service;
 
 import com.base.community.dto.ProjectDto;
 import com.base.community.dto.ProjectSkillDto;
-import com.base.community.model.entity.Member;
-import com.base.community.model.entity.MemberSkills;
-import com.base.community.model.entity.Project;
-import com.base.community.model.entity.ProjectSkill;
+import com.base.community.model.entity.*;
 import com.base.community.model.repository.MemberRepository;
+import com.base.community.model.repository.ProjectMemberRepository;
 import com.base.community.model.repository.ProjectRepository;
 import com.base.community.model.repository.ProjectSkillRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -28,8 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.base.community.type.MemberCode.MEMBER_STATUS_ING;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -46,6 +43,9 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectSkillRepository projectSkillRepository;
+
+    @Mock
+    private ProjectMemberRepository projectMemberRepository;
 
     @Test
     @DisplayName("프로젝트 전체 보기")
@@ -308,5 +308,111 @@ class ProjectServiceTest {
 
         // then
         assertEquals("삭제가 완료되었습니다.", result);
+    }
+
+    @DisplayName("프로젝트 신청")
+    @Test
+    void register_project_test() {
+        //given
+        List<MemberSkills> memberSkills = new ArrayList<>();
+        memberSkills.add(MemberSkills.builder().name("java").build());
+        memberSkills.add(MemberSkills.builder().name("spring").build());
+        Member member = Member.builder()
+                .id(1L)
+                .email("test@test.com")
+                .password("1234")
+                .name("테스트")
+                .nickname("멍멍이")
+                .birth(LocalDate.now())
+                .phone("01012345678")
+                .skills(memberSkills)
+                .emailAuth(true)
+                .emailAuthDate(LocalDateTime.now())
+                .userStatus(MEMBER_STATUS_ING.getStatus())
+                .build();
+
+        List<ProjectSkill> projectSkills = new ArrayList<>();
+        projectSkills.add(ProjectSkill.builder().name("spring").build());
+        projectSkills.add(ProjectSkill.builder().name("react").build());
+        Project project = Project.builder()
+                .id(1L)
+                .title("프로젝트")
+                .content("내용")
+                .maxTotal(5)
+                .nowTotal(0)
+                .isComplete(false)
+                .developPeriod("3")
+                .startDate(LocalDate.now())
+                .projectSkills(projectSkills)
+                .build();
+
+        given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(projectRepository.findById(anyLong())).willReturn(Optional.of(project));
+        given(projectMemberRepository.save(any())).willReturn(ProjectMember.builder()
+                .id(1L)
+                .project(project)
+                .member(member)
+                .accept(false)
+                .build());
+
+        //when
+        ProjectMember projectMember = projectService.registerProject(1L, 1L);
+
+        //then
+        assertEquals("프로젝트", projectMember.getProject().getTitle());
+        assertEquals(5, projectMember.getProject().getMaxTotal());
+        assertEquals("test@test.com", projectMember.getMember().getEmail());
+    }
+
+    @DisplayName("프로젝트 수락")
+    @Test
+    void accept_project_test() {
+        //given
+        List<MemberSkills> memberSkills = new ArrayList<>();
+        memberSkills.add(MemberSkills.builder().name("java").build());
+        memberSkills.add(MemberSkills.builder().name("spring").build());
+        Member member = Member.builder()
+                .id(1L)
+                .email("test@test.com")
+                .password("1234")
+                .name("테스트")
+                .nickname("멍멍이")
+                .birth(LocalDate.now())
+                .phone("01012345678")
+                .skills(memberSkills)
+                .emailAuth(true)
+                .emailAuthDate(LocalDateTime.now())
+                .userStatus(MEMBER_STATUS_ING.getStatus())
+                .build();
+
+        List<ProjectSkill> projectSkills = new ArrayList<>();
+        projectSkills.add(ProjectSkill.builder().name("spring").build());
+        projectSkills.add(ProjectSkill.builder().name("react").build());
+        Project project = Project.builder()
+                .id(1L)
+                .title("프로젝트")
+                .content("내용")
+                .maxTotal(5)
+                .nowTotal(0)
+                .isComplete(false)
+                .developPeriod("3")
+                .startDate(LocalDate.now())
+                .projectSkills(projectSkills)
+                .build();
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(1L)
+                .project(project)
+                .member(member)
+                .accept(true)
+                .build();
+
+        given(projectMemberRepository.findById(anyLong())).willReturn(Optional.of(projectMember));
+
+        //when
+        ProjectMember saveProjectMember = projectService.acceptProject(anyLong());
+
+        //then
+        assertTrue(saveProjectMember.isAccept());
     }
 }

@@ -1,11 +1,11 @@
 package com.base.community.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -19,6 +19,9 @@ public class ProjectMember {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    private Long memberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
+    private boolean accept;
 }
