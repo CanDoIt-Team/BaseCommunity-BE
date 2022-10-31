@@ -19,7 +19,9 @@ public enum ErrorCode {
 
 
     ALREADY_PROJECT_CREATE(HttpStatus.BAD_REQUEST, "프로젝트를 이미 등록하였습니다."),
+
     ALREADY_PROJECT_MAX_TOTAL_FULL(HttpStatus.BAD_REQUEST, "모집 정원을 초과하였습니다."),
+
     ALREADY_PROJECT_RECRUIT_END(HttpStatus.BAD_REQUEST, "이미 프로젝트 모집을 완료 하였습니다."),
     NOT_VALID_USER(HttpStatus.BAD_REQUEST, "업데이트 권한이 없는 회원 입니다."),
     ALREADY_PROJECT_COMPLETE_NOT_UPDATE(HttpStatus.BAD_REQUEST, "마감한 프로젝트는 수정할 수 없습니다."),

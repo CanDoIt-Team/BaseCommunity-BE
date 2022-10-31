@@ -15,5 +15,4 @@ public class UpdateMemberDto {
     private String Nickname;
     private LocalDate birth;
     private String phone;
-    private List<MemberSkillsDto> skills;
 }

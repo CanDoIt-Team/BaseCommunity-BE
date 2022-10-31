@@ -1,12 +1,10 @@
 package com.base.community.model.entity;
 
-import com.base.community.dto.MemberSkillsDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Entity
 @Getter
@@ -28,10 +26,11 @@ public class MemberSkills extends BaseEntity{
     private Member member;
 
 
-    public static MemberSkills of(MemberSkillsDto form) {
+    public static MemberSkills of(String form) {
         return MemberSkills.builder()
-                .name(form.getName())
+                .name(form)
                 .build();
     }
+
 
 }
