@@ -1,13 +1,18 @@
 spring:
+  config:
+    activate:
+      on-profile: production
+    import: 'aws-parameterstore:'
+
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/baseCommunity?serverTimezone=UTC&characterEncoding=UTF-8
-    username: root
-    password: 1111
+    url: ${jdbc.url}
+    username: ${jdbc.username}
+    password: ${jdbc.password}
 
   jpa:
     hibernate:
@@ -18,7 +23,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: basecommunity.web@gmail.com
-    password: password
+    password: ${mail.password}
     properties:
       mail:
         smtp:
@@ -26,13 +31,30 @@ spring:
             enable: true
 
   jwt:
-    secret: secret
+    secret: ${jwt.secret}
 
   servlet:
     multipart:
       max-file-size: 1MB
 
 
+  batch:
+    job:
+      names: ${job.name:NONE}
+
 dir:
   UrlPath: /files
-  LocalPath: path
+  LocalPath: /files
+
+api:
+  url: "http://openapi.work.go.kr/opi/opi/opia/wantedApi.do"
+  jobCode: "|133100|133101|133102|133200|133201|133202|133203|133204|133205|133206|133207|133300|133301|133302|133900"
+  authKey : ${api.authKey}
+  display: "100"
+
+aws:
+  paramstore:
+    enabled: true
+    prefix: /config
+    profile-separator: _
+    name: base-community
