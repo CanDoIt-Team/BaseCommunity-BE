@@ -241,7 +241,6 @@ public class MemberService implements UserDetailsService {
 
 
         if (!skill.isEmpty()) {
-            skill = skill.replaceAll("value","\"value\"");
             HashSet<String> skillList = new HashSet<>();
             try {
                 JSONParser parser = new JSONParser();
