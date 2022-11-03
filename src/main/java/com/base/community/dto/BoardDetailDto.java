@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class BoardDetailDto {
 
+    private Long boardId;
     private String category;
     private String title;
     private String nickname;

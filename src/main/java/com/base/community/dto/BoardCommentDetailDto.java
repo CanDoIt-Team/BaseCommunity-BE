@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BoardCommentDetailDto {
 
+    private Long boardId;
     private Long commentId;
     private Long memberId;
     private String nickname;

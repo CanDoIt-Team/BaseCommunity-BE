@@ -200,6 +200,7 @@ public class BoardService {
        List<BoardCommentDetailDto> commentList = new ArrayList<>();
         for (BoardCommentEntity boardCommentEntity: board.getComments()) {
             BoardCommentDetailDto comment = BoardCommentDetailDto.builder()
+                    .boardId(boardCommentEntity.getBoardEntity().getId())
                     .commentId(boardCommentEntity.getId())
                     .memberId(boardCommentEntity.getMember().getId())
                     .nickname(boardCommentEntity.getMember().getNickname())
@@ -212,6 +213,7 @@ public class BoardService {
         }
 
        return BoardDetailDto.builder()
+               .boardId(board.getId())
                 .category(board.getCategory())
                 .title(board.getTitle())
                 .nickname(board.getMember().getNickname())
