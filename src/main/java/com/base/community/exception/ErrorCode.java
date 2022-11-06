@@ -24,8 +24,9 @@ public enum ErrorCode {
     NOT_FOUND_PROJECT(HttpStatus.BAD_REQUEST, "일치하는 프로젝트가 없습니다."),
     NOT_LEADER_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트 생성자가 아닙니다."),
     NOT_FOUND_PROJECT_COMMENT(HttpStatus.BAD_REQUEST, "프로젝트 댓글이 존재하지 않습니다."),
-    
-    NOT_FOUND_BOARD(HttpStatus.BAD_REQUEST, "조회할 게시판 목록이 없습니다."),
+
+    NOT_FOUND_BOARD_COMMENT(HttpStatus.BAD_REQUEST, "게시글 댓글이 존재하지 않습니다."),
+    NOT_FOUND_BOARD(HttpStatus.BAD_REQUEST, "조회할 게시글이 없습니다."),
     NOT_AUTHORITY_BOARD_MODIFY(HttpStatus.BAD_REQUEST, "게시글을 수정할 권한이 없습니다."),
     NOT_AUTHORITY_BOARD_DELETE(HttpStatus.BAD_REQUEST, "게시글을 삭제할 권한이 없습니다."),
     NOT_AUTHORITY_COMMENT_MODIFY(HttpStatus.BAD_REQUEST, "댓글을 수정할 권한이 없습니다."),
