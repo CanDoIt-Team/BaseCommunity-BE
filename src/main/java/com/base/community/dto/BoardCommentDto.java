@@ -4,6 +4,7 @@ package com.base.community.dto;
 import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

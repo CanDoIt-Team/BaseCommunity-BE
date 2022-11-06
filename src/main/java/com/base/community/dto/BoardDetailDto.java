@@ -1,11 +1,13 @@
 package com.base.community.dto;
 
+import com.base.community.model.entity.BoardCommentEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

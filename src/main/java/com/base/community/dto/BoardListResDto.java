@@ -1,20 +1,22 @@
 package com.base.community.dto;
 
 
-import com.base.community.model.entity.BoardEntity;
-import com.base.community.model.entity.Member;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardDto {
+public class BoardListResDto {
 
+    private Long boardId;
     private String category;
     private String title;
-    private String content;
+    private String nickname;
+    private LocalDateTime createdAt;
+
 
 }
-

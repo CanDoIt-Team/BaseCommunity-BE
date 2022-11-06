@@ -3,6 +3,7 @@ package com.base.community.service;
 
 import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
+import com.base.community.exception.ErrorCode;
 import com.base.community.model.entity.*;
 import com.base.community.model.repository.BoardCommentRepository;
 import com.base.community.model.repository.BoardRepository;
@@ -28,7 +29,8 @@ public class BoardService {
     private final BoardCommentRepository boardCommentRepository;
 
     //게시글 전체보기
-    public Page<BoardEntity> boardList(String category, int page) {
+    @Transactional
+    public Map<String, Object> boardList(String category, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
@@ -37,22 +39,26 @@ public class BoardService {
         } else { //카테고리 조회
             boards = boardRepository.findByCategory(category, pageRequest);
         }
-        return boards;
+
+        return makeList(boards);
     }
 
+
     // 내가 작성한 글 목록
-    public Page<BoardEntity> myBoardList(Long memberId, int page){
+    @Transactional
+    public Map<String, Object> myBoardList(Long memberId, int page){
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
 
         boards = boardRepository.findByMemberId(memberId, pageRequest);
-        return boards;
+        return makeList(boards);
 
     }
 
     // 내가 좋아요한 글 목록
-    public Page<BoardEntity> myHeartList(Long memberId, int page){
+    @Transactional
+    public Map<String, Object> myHeartList(Long memberId, int page){
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         List <HeartEntity> hearts = heartRepository.findByMemberId(memberId);
@@ -62,50 +68,83 @@ public class BoardService {
         for (HeartEntity heart: hearts) {
             boardIdList.add(heart.getBoardId());
         }
-        return boardRepository.findByIdIn(boardIdList, pageRequest);
+
+        Page<BoardEntity> boards = boardRepository.findByIdIn(boardIdList, pageRequest);
+
+        return makeList(boards);
+
     }
 
-    @Transactional
+    private Map<String, Object> makeList(Page<BoardEntity> boards) {
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        if(boards.isEmpty()) {
+            resultMap.put("message", ErrorCode.NOT_FOUND_BOARD);
+            return resultMap;
+        }
+
+        List<BoardListResDto> list = new ArrayList<>();
+        for (BoardEntity boardEntity : boards) {
+            BoardListResDto boardListResDto = BoardListResDto.builder()
+                    .boardId(boardEntity.getId())
+                    .category(boardEntity.getCategory())
+                    .title(boardEntity.getTitle())
+                    .nickname(boardEntity.getMember().getNickname())
+                    .createdAt(boardEntity.getCreatedAt())
+                    .build();
+
+            list.add(boardListResDto);
+        }
+
+        resultMap.put("board", list);
+        resultMap.put("totalPage", boards.getTotalPages());
+        return resultMap;
+    }
+
     // 게시판 글 작성
+    @Transactional
     public Long writeBoard(BoardDto boardDto, Long memberId){
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-        BoardEntity board = boardRepository.save(BoardEntity.from(boardDto ,member));
-        return board.getId();
+        BoardEntity boardEntity =
+                boardRepository.save(BoardEntity.from(boardDto , memberRepository.findById(memberId).get()));
+        return boardEntity.getId();
     }
 
     // 게시판 글 수정
     @Transactional
     public Long modifyBoard(BoardDto boardDto, Long memberId,Long boardId ){
-        var board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
 
-        if (!Objects.equals(board.getMember().getId(), memberId)) { // 작성자만 수정 가능
-            throw new CustomException(NOT_AUTHORITY_BOARD_MODIFY);
-        }
-        board.setCategory(boardDto.getCategory());
-        board.setTitle(boardDto.getTitle());
-        board.setContent(boardDto.getContent());
-        return board.getId();
+       if(boardRepository.findById(boardId).get().getMember().getId() == memberId){
+
+           BoardEntity boardEntity = boardRepository.findById(boardId).get();
+
+           boardEntity.setCategory(boardDto.getCategory());
+           boardEntity.setTitle(boardDto.getTitle());
+           boardEntity.setContent(boardDto.getContent());
+           return boardEntity.getId();
+
+       } else {
+           throw new CustomException(NOT_AUTHORITY_BOARD_MODIFY);
+       }
     }
 
     // 게시판 글 삭제
     @Transactional
-    public String deleteBoard(Long memberId, Long boardId){
-        var board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
+    public void deleteBoard(Long memberId, Long boardId){
 
-        if (!Objects.equals(board.getMember().getId(), memberId)) { // 작성자만 삭제 가능
+        if(boardRepository.findById(boardId).get().getMember().getId() == memberId){
+            boardRepository.deleteById(boardId);
+        } else {
             throw new CustomException(NOT_AUTHORITY_BOARD_DELETE);
         }
-        boardRepository.deleteById(boardId);
-
-        return "삭제가 완료되었습니다.";
     }
 
     //게시글 좋아요
+    @Transactional
     public boolean heart(Long memberId, Long boardId){
 
+        Optional<Member> member = memberRepository.findById(memberId);
+        Optional<BoardEntity> boardEntity = boardRepository.findById(boardId);
         boolean check = heartRepository.existsById(new HeartId(memberId, boardId));
 
         if(check){
@@ -119,51 +158,40 @@ public class BoardService {
     //게시글 댓글작성
     @Transactional
     public Long writeBoardComment(BoardCommentDto dto, Long memberId, Long boardId) {
-        var member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-
-        var board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
-
         BoardCommentEntity boardCommentEntity =
-               boardCommentRepository.save(BoardCommentEntity.from(dto, member,board));
+               boardCommentRepository.save(BoardCommentEntity.from(dto, memberRepository.findById(memberId).get(),boardRepository.findById(boardId).get()));
 
         return boardCommentEntity.getId();
     }
 
     //게시글 댓글수정
     @Transactional
-    public Long modifyComment(BoardCommentDto dto, Long memberId, Long commentId) {
+    public Long modifyComment(BoardCommentDto dto, Long memberId,Long commentId) {
 
-        var boardComment =  boardCommentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD_COMMENT));
-
-        if (!Objects.equals(boardComment.getMember().getId(), memberId)) { // 작성자만 수정 가능
-            throw new CustomException(NOT_AUTHORITY_COMMENT_MODIFY);
-        }else{
-            boardComment.setContent(dto.getContent());
-            return boardComment.getId();
-        }
+            if (boardCommentRepository.findById(commentId).get().getMember().getId() == memberId){
+                BoardCommentEntity boardCommentEntity =
+                        boardCommentRepository.findById(commentId).get();
+                boardCommentEntity.setContent(dto.getContent());
+                return boardCommentEntity.getId();
+            } else {
+                throw new CustomException(NOT_AUTHORITY_COMMENT_MODIFY);
+            }
 
     }
 
     //게시글 댓글삭제
     @Transactional
-    public String deleteComment(Long memberId, Long commentId) {
-        var boardComment =  boardCommentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD_COMMENT));
+    public void deleteComment(Long memberId, Long commentId) {
 
-        if (!Objects.equals(boardComment.getMember().getId(), memberId)){
+        if (boardCommentRepository.findById(commentId).get().getMember().getId() == memberId){
+            boardCommentRepository.deleteById(commentId);
+        } else {
             throw new CustomException(NOT_AUTHORITY_COMMENT_DELETE);
-
         }
-        boardCommentRepository.deleteById(commentId);
-        return "댓글이 삭제되었습니다.";
 
     }
 
     // 게시글 상세보기
-
     public BoardDetailDto boardDetail(Long boardId) {
 
        BoardEntity board = boardRepository.findById(boardId)
