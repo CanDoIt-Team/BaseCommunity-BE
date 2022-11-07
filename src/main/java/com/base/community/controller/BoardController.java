@@ -7,7 +7,6 @@ import com.base.community.dto.BoardDto;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.BoardService;
 import lombok.AllArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

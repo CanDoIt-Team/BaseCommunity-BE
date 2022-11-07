@@ -1,7 +1,10 @@
 package com.base.community.service;
 
 
-import com.base.community.dto.*;
+import com.base.community.dto.BoardCommentDetailDto;
+import com.base.community.dto.BoardCommentDto;
+import com.base.community.dto.BoardDetailDto;
+import com.base.community.dto.BoardDto;
 import com.base.community.exception.CustomException;
 import com.base.community.model.entity.*;
 import com.base.community.model.repository.BoardCommentRepository;
@@ -14,7 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static com.base.community.exception.ErrorCode.*;
 
@@ -41,7 +46,7 @@ public class BoardService {
     }
 
     // 내가 작성한 글 목록
-    public Page<BoardEntity> myBoardList(Long memberId, int page){
+    public Page<BoardEntity> myBoardList(Long memberId, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
@@ -52,14 +57,14 @@ public class BoardService {
     }
 
     // 내가 좋아요한 글 목록
-    public Page<BoardEntity> myHeartList(Long memberId, int page){
+    public Page<BoardEntity> myHeartList(Long memberId, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
-        List <HeartEntity> hearts = heartRepository.findByMemberId(memberId);
+        List<HeartEntity> hearts = heartRepository.findByMemberId(memberId);
 
-        List <Long> boardIdList = new ArrayList<>();
+        List<Long> boardIdList = new ArrayList<>();
 
-        for (HeartEntity heart: hearts) {
+        for (HeartEntity heart : hearts) {
             boardIdList.add(heart.getBoardId());
         }
         return boardRepository.findByIdIn(boardIdList, pageRequest);
@@ -67,16 +72,16 @@ public class BoardService {
 
     @Transactional
     // 게시판 글 작성
-    public Long writeBoard(BoardDto boardDto, Long memberId){
+    public Long writeBoard(BoardDto boardDto, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-        BoardEntity board = boardRepository.save(BoardEntity.from(boardDto ,member));
+        BoardEntity board = boardRepository.save(BoardEntity.from(boardDto, member));
         return board.getId();
     }
 
     // 게시판 글 수정
     @Transactional
-    public Long modifyBoard(BoardDto boardDto, Long memberId,Long boardId ){
+    public Long modifyBoard(BoardDto boardDto, Long memberId, Long boardId) {
         var board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
 
@@ -91,7 +96,7 @@ public class BoardService {
 
     // 게시판 글 삭제
     @Transactional
-    public String deleteBoard(Long memberId, Long boardId){
+    public String deleteBoard(Long memberId, Long boardId) {
         var board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
 
@@ -104,11 +109,11 @@ public class BoardService {
     }
 
     //게시글 좋아요
-    public boolean heart(Long memberId, Long boardId){
+    public boolean heart(Long memberId, Long boardId) {
 
         boolean check = heartRepository.existsById(new HeartId(memberId, boardId));
 
-        if(check){
+        if (check) {
             heartRepository.deleteById(new HeartId(memberId, boardId));
             return false;
         }
@@ -126,7 +131,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
 
         BoardCommentEntity boardCommentEntity =
-               boardCommentRepository.save(BoardCommentEntity.from(dto, member,board));
+                boardCommentRepository.save(BoardCommentEntity.from(dto, member, board));
 
         return boardCommentEntity.getId();
     }
@@ -135,12 +140,12 @@ public class BoardService {
     @Transactional
     public Long modifyComment(BoardCommentDto dto, Long memberId, Long commentId) {
 
-        var boardComment =  boardCommentRepository.findById(commentId)
+        var boardComment = boardCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD_COMMENT));
 
         if (!Objects.equals(boardComment.getMember().getId(), memberId)) { // 작성자만 수정 가능
             throw new CustomException(NOT_AUTHORITY_COMMENT_MODIFY);
-        }else{
+        } else {
             boardComment.setContent(dto.getContent());
             return boardComment.getId();
         }
@@ -150,10 +155,10 @@ public class BoardService {
     //게시글 댓글삭제
     @Transactional
     public String deleteComment(Long memberId, Long commentId) {
-        var boardComment =  boardCommentRepository.findById(commentId)
+        var boardComment = boardCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD_COMMENT));
 
-        if (!Objects.equals(boardComment.getMember().getId(), memberId)){
+        if (!Objects.equals(boardComment.getMember().getId(), memberId)) {
             throw new CustomException(NOT_AUTHORITY_COMMENT_DELETE);
 
         }
@@ -166,16 +171,17 @@ public class BoardService {
 
     public BoardDetailDto boardDetail(Long boardId) {
 
-       BoardEntity board = boardRepository.findById(boardId)
+        BoardEntity board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BOARD));
 
-       List<BoardCommentDetailDto> commentList = new ArrayList<>();
-        for (BoardCommentEntity boardCommentEntity: board.getComments()) {
+        List<BoardCommentDetailDto> commentList = new ArrayList<>();
+        for (BoardCommentEntity boardCommentEntity : board.getComments()) {
             BoardCommentDetailDto comment = BoardCommentDetailDto.builder()
                     .boardId(boardCommentEntity.getBoardEntity().getId())
                     .commentId(boardCommentEntity.getId())
                     .memberId(boardCommentEntity.getMember().getId())
                     .nickname(boardCommentEntity.getMember().getNickname())
+                    .urlFilename(boardCommentEntity.getMember().getUrlFilename())
                     .content(boardCommentEntity.getContent())
                     .createAt(boardCommentEntity.getCreatedAt())
                     .updateAt(boardCommentEntity.getModifiedAt())
@@ -184,11 +190,12 @@ public class BoardService {
             commentList.add(comment);
         }
 
-       return BoardDetailDto.builder()
-               .boardId(board.getId())
+        return BoardDetailDto.builder()
+                .boardId(board.getId())
                 .category(board.getCategory())
                 .title(board.getTitle())
                 .nickname(board.getMember().getNickname())
+                .urlFilename(board.getMember().getUrlFilename())
                 .content(board.getContent())
                 .createAt(board.getCreatedAt())
                 .updateAt(board.getModifiedAt())

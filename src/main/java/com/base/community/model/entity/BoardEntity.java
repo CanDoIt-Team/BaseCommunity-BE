@@ -2,7 +2,6 @@ package com.base.community.model.entity;
 
 
 import com.base.community.dto.BoardDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
@@ -19,14 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
-public class BoardEntity extends BaseEntity{
+public class BoardEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -46,7 +44,7 @@ public class BoardEntity extends BaseEntity{
     @Builder.Default
     private List<BoardCommentEntity> comments = new ArrayList<>();
 
-    public static BoardEntity from(BoardDto dto , Member member) {
+    public static BoardEntity from(BoardDto dto, Member member) {
         return BoardEntity.builder()
                 .member(member)
                 .category(dto.getCategory())
