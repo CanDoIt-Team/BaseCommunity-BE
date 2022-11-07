@@ -188,7 +188,7 @@ class BoardServiceTest {
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(boardRepository.findByCategory("IT",pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByCategoryOrderByIdDesc("IT",pageable)).willReturn(boardEntityPage);
 
         //when
         Page<BoardEntity> board = boardService.boardList("IT",0);
@@ -234,7 +234,7 @@ class BoardServiceTest {
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(boardRepository.findByMemberId(member.getId(),pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByMemberIdOrderByIdDesc(member.getId(),pageable)).willReturn(boardEntityPage);
 
         //when
         Page<BoardEntity> board = boardService.myBoardList(1L,0);
@@ -287,7 +287,7 @@ class BoardServiceTest {
             boardIdList.add(heart.getBoardId());
         }
 
-        given(boardRepository.findByIdIn(boardIdList, pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByIdInOrderByIdDesc(boardIdList, pageable)).willReturn(boardEntityPage);
 
 
         //when
