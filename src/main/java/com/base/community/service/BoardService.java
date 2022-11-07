@@ -38,9 +38,9 @@ public class BoardService {
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
         if (category == null) { //전체 조회
-            boards = boardRepository.findAll(pageRequest);
+            boards = boardRepository.findAllByOrderByIdDesc(pageRequest);
         } else { //카테고리 조회
-            boards = boardRepository.findByCategory(category, pageRequest);
+            boards = boardRepository.findByCategoryOrderByIdDesc(category, pageRequest);
         }
         return boards;
     }
@@ -51,7 +51,7 @@ public class BoardService {
         PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
 
-        boards = boardRepository.findByMemberId(memberId, pageRequest);
+        boards = boardRepository.findByMemberIdOrderByIdDesc(memberId, pageRequest);
         return boards;
 
     }
@@ -67,7 +67,7 @@ public class BoardService {
         for (HeartEntity heart : hearts) {
             boardIdList.add(heart.getBoardId());
         }
-        return boardRepository.findByIdIn(boardIdList, pageRequest);
+        return boardRepository.findByIdInOrderByIdDesc(boardIdList, pageRequest);
     }
 
     @Transactional
