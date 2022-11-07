@@ -69,7 +69,7 @@ public class ProjectController {
     }
 
     @ApiOperation(value = "프로젝트 신청")
-    @GetMapping("/{projectId}")
+    @GetMapping("/register/{projectId}")
     public ResponseEntity<ProjectMember> registerProject(@RequestHeader("X-AUTH-TOKEN") String token,
                                              @PathVariable("projectId") Long projectId) {
         return ResponseEntity.ok(projectService
@@ -77,7 +77,7 @@ public class ProjectController {
     }
 
     @ApiOperation(value = "프로젝트 수락")
-    @GetMapping("/{memberId}")
+    @GetMapping("/accept/{memberId}")
     public ResponseEntity<?> acceptProject(@PathVariable Long memberId) {
         return ResponseEntity.ok(projectService.acceptProject(memberId));
     }
