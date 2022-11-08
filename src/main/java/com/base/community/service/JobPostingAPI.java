@@ -31,16 +31,16 @@ import java.util.stream.Collectors;
 public class JobPostingAPI {
     private final JobPostingRepository jobPostingRepository;
 
-    @Value("${api.url}")
+    @Value("${api.external-work.url}")
     String url;
 
-    @Value("${api.jobCode}")
+    @Value("${api.external-work.jobCode}")
     String jobCode;
 
-    @Value("${api.authKey}")
+    @Value("${api.external-work.authKey}")
     String authKey;
 
-    @Value("${api.display}")
+    @Value("${api.external-work.display}")
     String display;
 
 
