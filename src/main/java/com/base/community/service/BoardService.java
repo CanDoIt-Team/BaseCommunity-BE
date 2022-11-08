@@ -1,10 +1,7 @@
 package com.base.community.service;
 
 
-import com.base.community.dto.BoardCommentDetailDto;
-import com.base.community.dto.BoardCommentDto;
-import com.base.community.dto.BoardDetailDto;
-import com.base.community.dto.BoardDto;
+import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
 import com.base.community.model.entity.*;
 import com.base.community.model.repository.BoardCommentRepository;
@@ -12,6 +9,7 @@ import com.base.community.model.repository.BoardRepository;
 import com.base.community.model.repository.HeartRepository;
 import com.base.community.model.repository.MemberRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -23,6 +21,7 @@ import java.util.Objects;
 
 import static com.base.community.exception.ErrorCode.*;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class BoardService {
@@ -33,14 +32,22 @@ public class BoardService {
     private final BoardCommentRepository boardCommentRepository;
 
     //게시글 전체보기
-    public Page<BoardEntity> boardList(String category, int page) {
+    public Page<BoardEntity> boardList(String category, String keyword, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
-        Page<BoardEntity> boards;
-        if (category == null) { //전체 조회
+        Page<BoardEntity> boards;//전체 조회
+        if (category == null && keyword == null) {
+            log.info("실행됨 keyword && category != null");
             boards = boardRepository.findAllByOrderByIdDesc(pageRequest);
-        } else { //카테고리 조회
+        } else if (category != null && keyword == null) {
+            log.info("실행됨 category != null");
             boards = boardRepository.findByCategoryOrderByIdDesc(category, pageRequest);
+        } else if (keyword != null && category == null) {
+            log.info("실행됨 keyword != null");
+            boards = boardRepository.findByTitleContainingOrderByIdDesc(keyword, pageRequest);
+        } else {
+            log.info("실행됨 keyword && category != null");
+            boards = boardRepository.findByCategoryAndTitleContainingOrderByIdDesc(category, keyword, pageRequest);
         }
         return boards;
     }
