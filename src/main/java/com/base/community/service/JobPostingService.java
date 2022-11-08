@@ -25,6 +25,7 @@ public class JobPostingService {
 
 
 
+
     public void deleteJobPosting() throws IOException, ParserConfigurationException, SAXException {
         jobPostingAPI.deleteJobPosting();
     }

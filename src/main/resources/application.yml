@@ -44,13 +44,14 @@ spring:
 
 dir:
   UrlPath: /files
-  LocalPath: /files
+  LocalPath: "경로를 설정해주세요"
 
 api:
-  url: "http://openapi.work.go.kr/opi/opi/opia/wantedApi.do"
-  jobCode: "|133100|133101|133102|133200|133201|133202|133203|133204|133205|133206|133207|133300|133301|133302|133900"
-  authKey : ${api.authKey}
-  display: "100"
+  external-work:
+    url: "http://openapi.work.go.kr/opi/opi/opia/wantedApi.do"
+    jobCode: "|133100|133101|133102|133200|133201|133202|133203|133204|133205|133206|133207|133300|133301|133302|133900"
+    authKey: ${api.authKey}
+    display: "100"
 
 aws:
   paramstore:
