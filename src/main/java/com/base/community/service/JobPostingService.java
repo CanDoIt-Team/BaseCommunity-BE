@@ -24,14 +24,16 @@ public class JobPostingService {
     }
 
 
+
+
     public void deleteJobPosting() throws IOException, ParserConfigurationException, SAXException {
         jobPostingAPI.deleteJobPosting();
-
     }
 
     public Page<JobPosting> getPosting(Pageable pageable) {
         return jobPostingRepository.findAll(pageable);
     }
+
 
 
 }
