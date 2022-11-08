@@ -39,7 +39,9 @@ public enum ErrorCode {
     NOT_AUTHORITY_BOARD_MODIFY(HttpStatus.BAD_REQUEST, "게시글을 수정할 권한이 없습니다."),
     NOT_AUTHORITY_BOARD_DELETE(HttpStatus.BAD_REQUEST, "게시글을 삭제할 권한이 없습니다."),
     NOT_AUTHORITY_COMMENT_MODIFY(HttpStatus.BAD_REQUEST, "댓글을 수정할 권한이 없습니다."),
-    NOT_AUTHORITY_COMMENT_DELETE(HttpStatus.BAD_REQUEST, "댓글을 삭제할 권한이 없습니다.")
+    NOT_AUTHORITY_COMMENT_DELETE(HttpStatus.BAD_REQUEST, "댓글을 삭제할 권한이 없습니다."),
+
+    NOT_INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효한 토큰이 아닙니다.")
     ;
 
 

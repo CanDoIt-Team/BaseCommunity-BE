@@ -31,16 +31,16 @@ import java.util.stream.Collectors;
 public class JobPostingAPI {
     private final JobPostingRepository jobPostingRepository;
 
-    @Value("${api.url}")
+    @Value("${api.external-work.url}")
     String url;
 
-    @Value("${api.jobCode}")
+    @Value("${api.external-work.jobCode}")
     String jobCode;
 
-    @Value("${api.authKey}")
+    @Value("${api.external-work.authKey}")
     String authKey;
 
-    @Value("${api.display}")
+    @Value("${api.external-work.display}")
     String display;
 
 
@@ -222,16 +222,16 @@ public class JobPostingAPI {
         List<String> apiList = deleteDocument();
 
         for (int i = 0; i < count; i++) {
-                String findNo  = name.get(i);
-                List<String> result = apiList.stream()
-                        .filter(str -> str.trim().equals(findNo))
-                        .collect(Collectors.toList());
-                if(result.size() == 0){
-                    jobPostingRepository.deleteById(findNo);
-                    log.info("#######################################");
-                    log.info(findNo+"삭제");
-                    log.info("######################################3");
-                }
+            String findNo = name.get(i);
+            List<String> result = apiList.stream()
+                    .filter(str -> str.trim().equals(findNo))
+                    .collect(Collectors.toList());
+            if (result.size() == 0) {
+                jobPostingRepository.deleteById(findNo);
+                log.info("#######################################");
+                log.info(findNo + "삭제");
+                log.info("######################################3");
+            }
         }
     }
 
@@ -251,7 +251,7 @@ public class JobPostingAPI {
                 Node node = nodeList.item(j);
                 JobPostingDto jobPostingDto = new JobPostingDto();
                 Element element = (Element) node;
-                list.add(getTagValue("wantedAuthNo",element));
+                list.add(getTagValue("wantedAuthNo", element));
             }
 
         }
