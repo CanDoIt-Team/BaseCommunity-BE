@@ -127,9 +127,9 @@ public class AuthController {
 
     //로그아웃
     @GetMapping("/signout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
+        public String logout(HttpSession session) {
+            session.invalidate();
+            return "redirect:/";
     }
 
 }

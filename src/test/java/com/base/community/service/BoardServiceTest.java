@@ -188,10 +188,10 @@ class BoardServiceTest {
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(boardRepository.findByCategoryOrderByIdDesc("IT",pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByCategoryOrderByIdDesc("IT", (PageRequest) pageable)).willReturn(boardEntityPage);
 
         //when
-        Page<BoardEntity> board = boardService.boardList("IT",0);
+        Page<BoardEntity> board = boardService.boardList("IT","",0);
 
         //then
         assertEquals("IT", board.getContent().get(0).getCategory());
@@ -234,7 +234,7 @@ class BoardServiceTest {
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(boardRepository.findByMemberIdOrderByIdDesc(member.getId(),pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByMemberIdOrderByIdDesc(member.getId(), (PageRequest) pageable)).willReturn(boardEntityPage);
 
         //when
         Page<BoardEntity> board = boardService.myBoardList(1L,0);
@@ -287,7 +287,7 @@ class BoardServiceTest {
             boardIdList.add(heart.getBoardId());
         }
 
-        given(boardRepository.findByIdInOrderByIdDesc(boardIdList, pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByIdInOrderByIdDesc(boardIdList, (PageRequest) pageable)).willReturn(boardEntityPage);
 
 
         //when
