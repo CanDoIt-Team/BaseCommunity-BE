@@ -16,14 +16,14 @@ public enum ErrorCode {
     PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
     NOT_AUTHENTICATE_USER(HttpStatus.BAD_REQUEST,"이메일 인증이 필요합니다."),
     WITHDRAW_USER(HttpStatus.BAD_REQUEST,"탈퇴한 회웝입니다."),
-
+    NOT_VALID_USER(HttpStatus.BAD_REQUEST, "유효하지 않은 회원입니다."),
 
     ALREADY_PROJECT_CREATE(HttpStatus.BAD_REQUEST, "프로젝트를 이미 등록하였습니다."),
 
     ALREADY_PROJECT_MAX_TOTAL_FULL(HttpStatus.BAD_REQUEST, "모집 정원을 초과하였습니다."),
 
     ALREADY_PROJECT_RECRUIT_END(HttpStatus.BAD_REQUEST, "이미 프로젝트 모집을 완료 하였습니다."),
-    NOT_VALID_USER(HttpStatus.BAD_REQUEST, "업데이트 권한이 없는 회원 입니다."),
+    NOT_UPDATE_VALID_USER(HttpStatus.BAD_REQUEST, "업데이트 권한이 없는 회원 입니다."),
     ALREADY_PROJECT_COMPLETE_NOT_UPDATE(HttpStatus.BAD_REQUEST, "마감한 프로젝트는 수정할 수 없습니다."),
     ALREADY_PROJECT_COMPLETE(HttpStatus.BAD_REQUEST, "마감된 프로젝트 입니다."),
     NOT_VALID_MAX_TOTAL(HttpStatus.BAD_REQUEST, "현재 신청한 인원보다 모집 인원의 수가 더 많아야 합니다."),
@@ -41,6 +41,7 @@ public enum ErrorCode {
     NOT_AUTHORITY_COMMENT_MODIFY(HttpStatus.BAD_REQUEST, "댓글을 수정할 권한이 없습니다."),
     NOT_AUTHORITY_COMMENT_DELETE(HttpStatus.BAD_REQUEST, "댓글을 삭제할 권한이 없습니다."),
 
+    NOT_FOUND_CHATROOM(HttpStatus.BAD_REQUEST, "채팅방이 존재하지 않습니다."),
     NOT_INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효한 토큰이 아닙니다.")
     ;
 
