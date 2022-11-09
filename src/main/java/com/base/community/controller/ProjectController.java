@@ -103,4 +103,11 @@ public class ProjectController {
         projectCommentService.deleteComment(commentId);
         return ResponseEntity.ok("삭제가 완료되었습니다.");
     }
+
+    @ApiOperation(value = "내 프로젝트 조회")
+    @GetMapping("/myProjectList")
+    public ResponseEntity<Project> myProjectList(@RequestHeader(name = "X-AUTH-TOKEN") String token) {
+        return ResponseEntity.ok(projectService.myProjectList(tokenProvider
+                .getUser(token).getId()));
+    }
 }

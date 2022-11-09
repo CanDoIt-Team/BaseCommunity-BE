@@ -57,6 +57,12 @@ public class Project extends BaseEntity{
     @Builder.Default
     private List<ProjectComment> projectComments = new ArrayList<>();
 
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id")
+    @Builder.Default
+    private List<ProjectMember> projectMembers = new ArrayList<>();
+
     public static Project of(ProjectDto dto) {
         return Project.builder()
                 .title(dto.getTitle())
