@@ -62,7 +62,7 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
 
         if (!Objects.equals(project.getLeader().getId(), memberId)) { // 작성자만 수정 가능
-            throw new CustomException(NOT_VALID_USER);
+            throw new CustomException(NOT_UPDATE_VALID_USER);
         }
 
         if (project.isComplete()) {
@@ -91,7 +91,7 @@ public class ProjectService {
     @Transactional
     public String deleteProject(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(NOT_VALID_USER));
+                .orElseThrow(() -> new CustomException(NOT_UPDATE_VALID_USER));
 
         // 프로젝트 생성자 인지 확인
         Project project = projectRepository.findByLeader(member)
