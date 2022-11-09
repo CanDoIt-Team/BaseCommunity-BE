@@ -31,10 +31,12 @@ public class ProjectService {
     private final ProjectSkillRepository projectSkillRepository;
     private final ProjectMemberRepository projectMemberRepository;
 
+    @Transactional(readOnly = true)
     public Page<Project> getProject(final Pageable pageable) {
         return projectRepository.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Project getProjectDetail(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
@@ -45,12 +47,24 @@ public class ProjectService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
+        // 프로젝트 중복 등록 불가
         Optional<Project> projectOptional = projectRepository.findByLeader(member);
         if (projectOptional.isPresent()) {
             throw new CustomException(ALREADY_PROJECT_CREATE);
         }
 
+        // 다른 프로젝트 멤버일 경우 프로젝트 생성 불가
+        Optional<ProjectMember> projectMember = projectMemberRepository.findByMember(member);
+        if(projectMember.isPresent()) {
+            throw new CustomException(ALREADY_PROJECT_REGISTER);
+        }
+
         Project project = projectRepository.save(Project.of(parameter));
+        projectMemberRepository.save(ProjectMember.builder()
+                .project(project)
+                .member(member)
+                .accept(true)
+                .build());
         project.setLeader(member);
 
         return project;
@@ -88,7 +102,6 @@ public class ProjectService {
         return project;
     }
 
-    @Transactional
     public String deleteProject(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_UPDATE_VALID_USER));
@@ -106,7 +119,6 @@ public class ProjectService {
         return "삭제가 완료되었습니다.";
     }
 
-    @Transactional
     public String deleteProjectSkill(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
@@ -122,6 +134,9 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
 
+        if (projectMemberRepository.existsByMember(member)) {
+            throw new CustomException(ALREADY_PROJECT_REGISTER);
+        }
         if (project.isComplete()) {
             throw new CustomException(ALREADY_PROJECT_COMPLETE);
         }
@@ -139,11 +154,29 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectMember acceptProject(Long projectMemberId) {
-        ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
+    public ProjectMember acceptProject(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+        ProjectMember projectMember = projectMemberRepository.findByMember(member)
                 .orElseThrow(() -> new CustomException(NOT_VALID_PROJECT_REGISTER_MEMBER));
 
         projectMember.setAccept(true);
         return projectMember;
+    }
+
+    @Transactional(readOnly = true)
+    public Project myProjectList(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+
+        ProjectMember projectMember = projectMemberRepository.findByMember(member)
+                .orElseThrow(() -> new CustomException(NOT_REGISTER_PROJECT));
+
+        if(!projectMember.isAccept()) {
+            throw new CustomException(NOT_ACCEPT_PROJECT);
+        }
+
+        return projectRepository.findById(projectMember.getProject().getId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
     }
 }
