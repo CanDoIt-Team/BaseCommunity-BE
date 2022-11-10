@@ -47,9 +47,14 @@ public class BoardController {
     @GetMapping("/myHeartList")
     public ResponseEntity<?> myHeartList(@RequestHeader(name = "X-AUTH-TOKEN") String token,
                                          @RequestParam(defaultValue = "1") int page) {
-
         return ResponseEntity.ok(boardService.myHeartList(tokenProvider.getUser(token).getId(), page - 1));
     }
+
+    @GetMapping("myHeartAllList")
+    public ResponseEntity<?> myHeartAllList(@RequestHeader(name = "X-AUTH-TOKEN") String token){
+        return ResponseEntity.ok(boardService.myHeartAllList(tokenProvider.getUser(token).getId()));
+    }
+
 
 
     // 게시글 작성

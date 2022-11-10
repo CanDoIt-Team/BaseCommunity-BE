@@ -77,6 +77,18 @@ public class BoardService {
         return boardRepository.findByIdInOrderByIdDesc(boardIdList, pageRequest);
     }
 
+    //내가 좋아요한 글 목록(전체리스트 페이징 처리 X)
+    public List<BoardEntity> myHeartAllList(Long memberId) {
+        List<HeartEntity> hearts = heartRepository.findByMemberId(memberId);
+
+        List<Long> boardIdList = new ArrayList<>();
+
+        for (HeartEntity heart : hearts) {
+            boardIdList.add(heart.getBoardId());
+        }
+        return boardRepository.findByIdInOrderByIdDesc(boardIdList);
+    }
+
     @Transactional
     // 게시판 글 작성
     public Long writeBoard(BoardDto boardDto, Long memberId) {
