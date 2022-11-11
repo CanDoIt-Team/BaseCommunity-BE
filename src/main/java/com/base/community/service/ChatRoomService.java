@@ -4,7 +4,6 @@ import com.base.community.exception.CustomException;
 import com.base.community.model.entity.ChatRoom;
 import com.base.community.model.entity.Member;
 import com.base.community.model.entity.Project;
-import com.base.community.model.repository.ChatMessageRepository;
 import com.base.community.model.repository.ChatRoomRepository;
 import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.ProjectRepository;
@@ -34,12 +33,6 @@ public class ChatRoomService {
 
         Project project = projectRepository.findByLeader(member)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
-
-        ChatRoom.builder()
-                .roomName(roomName)
-                .project(project)
-                .createdAt(LocalDateTime.now())
-                .build();
 
         return chatRoomRepository.save(ChatRoom.builder()
                 .roomName(roomName)
