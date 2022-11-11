@@ -21,7 +21,7 @@ public class ChatRoomController {
 
     @ApiOperation(value = "채팅방 생성")
     @PostMapping("/{roomName}")
-    public ResponseEntity<ChatRoom> createChatRoom(@RequestHeader("X-AUTH-TOKEN") String token,
+    public ResponseEntity<ChatRoom> createChatRoom(@RequestHeader(name = "X-AUTH-TOKEN") String token,
                                  @PathVariable String roomName) {
         log.info("# Create Chat Room , name: " + roomName);
         return ResponseEntity.ok(chatRoomService
