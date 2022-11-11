@@ -14,6 +14,8 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     Page<BoardEntity> findByIdInOrderByIdDesc(List<Long> boardIdList, PageRequest pageRequest);
 
+    List<BoardEntity> findByIdInOrderByIdDesc(List<Long> boardIdList);
+
     Page<BoardEntity> findByMemberIdOrderByIdDesc(Long memberId, PageRequest pageRequest);
 
     Page<BoardEntity> findByCategoryOrderByIdDesc(String category, PageRequest pageRequest);
