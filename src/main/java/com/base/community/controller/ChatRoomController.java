@@ -20,7 +20,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @ApiOperation(value = "채팅방 생성")
-    @PostMapping(value = "/{roomName}")
+    @PostMapping("/{roomName}")
     public ResponseEntity<ChatRoom> createChatRoom(@RequestHeader("X-AUTH-TOKEN") String token,
                                  @PathVariable String roomName) {
         log.info("# Create Chat Room , name: " + roomName);
