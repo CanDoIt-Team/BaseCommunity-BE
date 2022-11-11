@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,30 +65,17 @@ public class BoardService {
     }
 
     // 내가 좋아요한 글 목록
-    public Page<BoardEntity> myHeartList(Long memberId, int page) {
-
-        PageRequest pageRequest = PageRequest.of(page, 10);
+    public Page<BoardEntity> myHeartList(Long memberId, final Pageable pageable) {
         List<HeartEntity> hearts = heartRepository.findByMemberId(memberId);
-
         List<Long> boardIdList = new ArrayList<>();
-
         for (HeartEntity heart : hearts) {
             boardIdList.add(heart.getBoardId());
         }
-        return boardRepository.findByIdInOrderByIdDesc(boardIdList, pageRequest);
+        return boardRepository.findByIdInOrderByIdDesc(boardIdList, pageable);
+
+
     }
 
-    //내가 좋아요한 글 목록(전체리스트 페이징 처리 X)
-    public List<BoardEntity> myHeartAllList(Long memberId) {
-        List<HeartEntity> hearts = heartRepository.findByMemberId(memberId);
-
-        List<Long> boardIdList = new ArrayList<>();
-
-        for (HeartEntity heart : hearts) {
-            boardIdList.add(heart.getBoardId());
-        }
-        return boardRepository.findByIdInOrderByIdDesc(boardIdList);
-    }
 
     @Transactional
     // 게시판 글 작성
