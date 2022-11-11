@@ -291,7 +291,7 @@ class BoardServiceTest {
 
 
         //when
-        Page<BoardEntity> heart = boardService.myHeartList(1L,0);
+        Page<BoardEntity> heart = boardService.myHeartList(1L, (PageRequest) pageable);
 
         //then
         assertEquals(1, heart.getTotalPages());
