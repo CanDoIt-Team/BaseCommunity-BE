@@ -12,11 +12,11 @@ import com.base.community.model.repository.ProjectMemberRepository;
 import com.base.community.model.repository.ProjectRepository;
 import com.base.community.model.repository.ProjectSkillRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,6 +24,7 @@ import static com.base.community.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final MemberRepository memberRepository;
@@ -32,8 +33,12 @@ public class ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
 
     @Transactional(readOnly = true)
-    public Page<Project> getProject(final Pageable pageable) {
-        return projectRepository.findAll(pageable);
+    public Page<Project> getProject(final Pageable pageable, String keyword) {
+        if (keyword == null) {
+            return projectRepository.findAll(pageable);
+        }else{
+            return projectRepository.findByTitleContainingOrderByCreatedAtDesc(keyword, pageable);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -55,7 +60,7 @@ public class ProjectService {
 
         // 다른 프로젝트 멤버일 경우 프로젝트 생성 불가
         Optional<ProjectMember> projectMember = projectMemberRepository.findByMember(member);
-        if(projectMember.isPresent()) {
+        if (projectMember.isPresent()) {
             throw new CustomException(ALREADY_PROJECT_REGISTER);
         }
 
@@ -127,7 +132,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectMember registerProject(Long memberId, Long projectId) {
+    public ProjectMember registerProjectMember(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
@@ -144,6 +149,9 @@ public class ProjectService {
             throw new CustomException(ALREADY_PROJECT_MAX_TOTAL_FULL);
         }
 
+        project.setNowTotal(project.getNowTotal() + 1);
+        projectRepository.save(project);
+
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .member(member)
@@ -154,7 +162,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectMember acceptProject(Long memberId) {
+    public ProjectMember acceptProjectMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
         ProjectMember projectMember = projectMemberRepository.findByMember(member)
@@ -172,7 +180,7 @@ public class ProjectService {
         ProjectMember projectMember = projectMemberRepository.findByMember(member)
                 .orElseThrow(() -> new CustomException(NOT_REGISTER_PROJECT));
 
-        if(!projectMember.isAccept()) {
+        if (!projectMember.isAccept()) {
             throw new CustomException(NOT_ACCEPT_PROJECT);
         }
 

@@ -25,14 +25,15 @@ public class ChatRoom {
 
     private String roomName;
 
-    @JsonIgnore
-    @OneToOne
+    @JsonBackReference
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
     private Project project;
 
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "chat_room_id")
+    @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
 
     private LocalDateTime createdAt;

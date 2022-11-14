@@ -47,6 +47,10 @@ class BoardServiceTest {
     private BoardCommentRepository boardCommentRepository;
 
     @Mock
+    private Pageable pageable;
+
+
+    @Mock
     private HeartRepository heartRepository;
 
     @Test
@@ -188,10 +192,10 @@ class BoardServiceTest {
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(boardRepository.findByCategoryOrderByIdDesc("IT", (PageRequest) pageable)).willReturn(boardEntityPage);
+        given(boardRepository.findByCategoryOrderByIdDesc("IT", pageable)).willReturn(boardEntityPage);
 
         //when
-        Page<BoardEntity> board = boardService.boardList("IT","",0);
+        Page<BoardEntity> board = boardService.boardList("IT",null,pageable);
 
         //then
         assertEquals("IT", board.getContent().get(0).getCategory());
@@ -232,12 +236,13 @@ class BoardServiceTest {
                 .build());
 
         Page<BoardEntity> boardEntityPage = new PageImpl<>(boardEntities);
-        Pageable pageable = PageRequest.of(0, 10);
+        final Pageable pageable = null;
 
-        given(boardRepository.findByMemberIdOrderByIdDesc(member.getId(), (PageRequest) pageable)).willReturn(boardEntityPage);
+
+        given(boardRepository.findByMemberIdOrderByIdDesc(member.getId(), pageable)).willReturn(boardEntityPage);
 
         //when
-        Page<BoardEntity> board = boardService.myBoardList(1L,0);
+        Page<BoardEntity> board = boardService.myBoardList(1L,pageable);
 
         //then
         assertEquals("IT", board.getContent().get(0).getCategory());

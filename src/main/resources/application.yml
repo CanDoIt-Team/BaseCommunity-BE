@@ -1,16 +1,11 @@
 spring:
-  config:
-    activate:
-      on-profile: production
-    import: 'aws-parameterstore:'
-
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${jdbc.url}
+    url: jdbc:mysql://hodb.cvqao9ppajc1.ap-northeast-2.rds.amazonaws.com:3306/baseCommunity?serverTimezone=UTC&characterEncoding=UTF-8
     username: ${jdbc.username}
     password: ${jdbc.password}
 
@@ -37,14 +32,13 @@ spring:
     multipart:
       max-file-size: 1MB
 
-
   batch:
     job:
       names: ${job.name:NONE}
 
 dir:
   UrlPath: /files
-  LocalPath: "경로를 설정해주세요"
+  LocalPath: D:\dev\Project\BaseCommunity-BE\files
 
 api:
   external-work:
@@ -53,9 +47,3 @@ api:
     authKey: ${api.authKey}
     display: "100"
 
-aws:
-  paramstore:
-    enabled: true
-    prefix: /config
-    profile-separator: _
-    name: base-community
