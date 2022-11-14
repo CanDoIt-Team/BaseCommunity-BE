@@ -2,7 +2,7 @@ spring:
   datasource:
     hikari:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      jdbc-url: ${jdbc.url}
+      jdbc-url: jdbc:mysql://hodb.cvqao9ppajc1.ap-northeast-2.rds.amazonaws.com:3306/baseCommunity?serverTimezone=UTC&characterEncoding=UTF-8
       username: ${jdbc.username}
       password: ${jdbc.password}
 
