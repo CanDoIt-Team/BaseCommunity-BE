@@ -356,11 +356,12 @@ class ProjectServiceTest {
                 .build());
 
         //when
-        ProjectMember projectMember = projectService.registerProject(1L, 1L);
+        ProjectMember projectMember = projectService.registerProjectMember(1L, 1L);
 
         //then
         assertEquals("프로젝트", projectMember.getProject().getTitle());
         assertEquals(5, projectMember.getProject().getMaxTotal());
+        assertEquals(1, projectMember.getProject().getNowTotal());
         assertEquals("test@test.com", projectMember.getMember().getEmail());
     }
 
@@ -410,9 +411,63 @@ class ProjectServiceTest {
         given(projectMemberRepository.findById(anyLong())).willReturn(Optional.of(projectMember));
 
         //when
-        ProjectMember saveProjectMember = projectService.acceptProject(anyLong());
+        ProjectMember saveProjectMember = projectService.acceptProjectMember(anyLong());
 
         //then
         assertTrue(saveProjectMember.isAccept());
+    }
+
+    @DisplayName("내 프로젝트")
+    @Test
+    void get_my_project_test() {
+        List<MemberSkills> memberSkills = new ArrayList<>();
+        memberSkills.add(MemberSkills.builder().name("java").build());
+        memberSkills.add(MemberSkills.builder().name("spring").build());
+        Member member = Member.builder()
+                .id(1L)
+                .email("test@test.com")
+                .password("1234")
+                .name("테스트")
+                .nickname("멍멍이")
+                .birth(LocalDate.now())
+                .phone("01012345678")
+                .skills(memberSkills)
+                .emailAuth(true)
+                .emailAuthDate(LocalDateTime.now())
+                .userStatus(MEMBER_STATUS_ING.getStatus())
+                .build();
+
+        List<ProjectSkill> projectSkills = new ArrayList<>();
+        projectSkills.add(ProjectSkill.builder().name("spring").build());
+        projectSkills.add(ProjectSkill.builder().name("react").build());
+        Project project = Project.builder()
+                .id(1L)
+                .title("프로젝트")
+                .content("내용")
+                .leader(member)
+                .maxTotal(5)
+                .nowTotal(0)
+                .isComplete(false)
+                .developPeriod("3")
+                .startDate(LocalDate.now())
+                .projectSkills(projectSkills)
+                .build();
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(1L)
+                .project(project)
+                .member(member)
+                .accept(true)
+                .build();
+
+        given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(projectMemberRepository.findByMember(any())).willReturn(Optional.of(projectMember));
+        given(projectRepository.findById(anyLong())).willReturn(Optional.of(project));
+
+        // when
+        Project myProjectList = projectService.myProjectList(1L);
+
+        // then
+        assertEquals(1L, myProjectList.getId());
     }
 }

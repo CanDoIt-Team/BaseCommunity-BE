@@ -127,7 +127,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectMember registerProject(Long memberId, Long projectId) {
+    public ProjectMember registerProjectMember(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
@@ -144,6 +144,9 @@ public class ProjectService {
             throw new CustomException(ALREADY_PROJECT_MAX_TOTAL_FULL);
         }
 
+        project.setNowTotal(project.getNowTotal() + 1);
+        projectRepository.save(project);
+
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .member(member)
@@ -154,7 +157,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectMember acceptProject(Long memberId) {
+    public ProjectMember acceptProjectMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
         ProjectMember projectMember = projectMemberRepository.findByMember(member)

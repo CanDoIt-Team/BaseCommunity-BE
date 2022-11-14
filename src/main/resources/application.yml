@@ -44,7 +44,7 @@ spring:
 
 dir:
   UrlPath: /files
-  LocalPath: "경로를 설정해주세요"
+  LocalPath: D:\dev\Project\BaseCommunity-BE\files
 
 api:
   external-work:
