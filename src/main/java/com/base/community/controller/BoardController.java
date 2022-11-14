@@ -26,13 +26,10 @@ public class BoardController {
     @ApiOperation(value="게시글 리스트 조회")
     @GetMapping()
     public ResponseEntity<?> boardList(@RequestParam(required = false) String category,
-                                       @RequestParam(required = false) String keyword,
-                                       @RequestParam(defaultValue = "1") int page) {
-        log.info("category : " + category + "| keyword : " + keyword);
-        return ResponseEntity.ok(boardService.boardList(category, keyword, page - 1));
+                                       @RequestParam(required = false) String keyword
+                                      , final Pageable pageable) {
+        return ResponseEntity.ok(boardService.boardList(category, keyword,pageable));
     }
-
-
 
     @ApiOperation(value="게시글 리스트 조회")
     @GetMapping("/{boardId}")
@@ -41,16 +38,14 @@ public class BoardController {
         return ResponseEntity.ok(boardService.boardDetail(boardId));
     }
 
-    // 내가 작성한 게시글 목록 보기
     @ApiOperation(value="내가 작성한 게시글 목록 보기")
     @GetMapping("/myBoardList")
     public ResponseEntity<?> myBoardList(@RequestHeader(name = "X-AUTH-TOKEN") String token,
-                                         @RequestParam(defaultValue = "1") int page) {
+                                        final Pageable pageable) {
 
-        return ResponseEntity.ok(boardService.myBoardList(tokenProvider.getUser(token).getId(), page - 1));
+        return ResponseEntity.ok(boardService.myBoardList(tokenProvider.getUser(token).getId(), pageable));
     }
 
-    // 내가 좋아요한 게시글 목록 보기
     @ApiOperation(value="내가 좋아용한 게시글 목록 보기")
     @GetMapping("/myHeartList")
     public ResponseEntity<?> myHeartList(@RequestHeader(name = "X-AUTH-TOKEN") String token,
@@ -58,9 +53,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.myHeartList(tokenProvider.getUser(token).getId(), pageable));
     }
 
-
-
-    // 게시글 작성
     @ApiOperation(value="게시글 작성")
     @PostMapping()
     public ResponseEntity<Long> write(@RequestHeader(name = "X-AUTH-TOKEN") String token
@@ -69,7 +61,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.writeBoard(form, tokenProvider.getUser(token).getId()));
     }
 
-    //게시글 수정
     @ApiOperation(value="게시글 수정")
     @PutMapping("/{boardId}")
     public ResponseEntity<Long> modify(@RequestHeader(name = "X-AUTH-TOKEN") String token
@@ -78,7 +69,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.modifyBoard(form, tokenProvider.getUser(token).getId(), boardId));
     }
 
-    //게시글 삭제
     @ApiOperation(value="게시글 삭제")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<String> delete(@RequestHeader(name = "X-AUTH-TOKEN") String token
@@ -87,7 +77,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.deleteBoard(tokenProvider.getUser(token).getId(), boardId));
     }
 
-    // 댓글 작성
     @ApiOperation(value="댓글 작성")
     @PostMapping("/{boardId}/comments")
     public ResponseEntity<Long> writeComment(@RequestHeader(name = "X-AUTH-TOKEN") String token,
@@ -96,7 +85,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.writeBoardComment(form, tokenProvider.getUser(token).getId(), boardId));
     }
 
-    // 댓글 수정
     @ApiOperation(value="댓글 수정")
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<Long> modifyComment(@RequestHeader(name = "X-AUTH-TOKEN") String token,
@@ -104,7 +92,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.modifyComment(form, tokenProvider.getUser(token).getId(), commentId));
     }
 
-    // 댓글 삭제
     @ApiOperation(value="댓글 삭제")
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<String> deleteComment(@RequestHeader(name = "X-AUTH-TOKEN") String token
@@ -114,14 +101,11 @@ public class BoardController {
 
     }
 
-
-    // 좋아요 | 좋아요 취소
     @ApiOperation(value="좋아요, 좋아요 취소")
     @GetMapping("/{boardId}/hearts")
     public ResponseEntity<Boolean> heart(@PathVariable Long boardId, @RequestHeader(name = "X-AUTH-TOKEN") String token) {
 
         return ResponseEntity.ok(boardService.heart(tokenProvider.getUser(token).getId(), boardId));
     }
-
 
 }

@@ -67,7 +67,7 @@ class ProjectServiceTest {
         given(projectRepository.findAll(pageable)).willReturn(projectPage);
 
         // when
-        Page<Project> project = projectService.getProject(pageable);
+        Page<Project> project = projectService.getProject(pageable, null);
 
         // then
         assertEquals("프로젝트 모집", project.getContent().get(0).getTitle());

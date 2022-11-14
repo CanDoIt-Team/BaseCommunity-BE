@@ -33,35 +33,32 @@ public class BoardService {
     private final BoardCommentRepository boardCommentRepository;
 
     //게시글 전체보기
-    public Page<BoardEntity> boardList(String category, String keyword, int page) {
+    public Page<BoardEntity> boardList(String category, String keyword,final Pageable pageable) {
 
-        PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;//전체 조회
         if (category == null && keyword == null) {
             log.info("실행됨 keyword && category != null");
-            boards = boardRepository.findAllByOrderByIdDesc(pageRequest);
+            boards = boardRepository.findAllByOrderByIdDesc(pageable);
         } else if (category != null && keyword == null) {
             log.info("실행됨 category != null");
-            boards = boardRepository.findByCategoryOrderByIdDesc(category, pageRequest);
+            boards = boardRepository.findByCategoryOrderByIdDesc(category, pageable);
         } else if (keyword != null && category == null) {
             log.info("실행됨 keyword != null");
-            boards = boardRepository.findByTitleContainingOrderByIdDesc(keyword, pageRequest);
+            boards = boardRepository.findByTitleContainingOrderByIdDesc(keyword, pageable);
         } else {
             log.info("실행됨 keyword && category != null");
-            boards = boardRepository.findByCategoryAndTitleContainingOrderByIdDesc(category, keyword, pageRequest);
+            boards = boardRepository.findByCategoryAndTitleContainingOrderByIdDesc(category, keyword, pageable);
         }
         return boards;
     }
 
     // 내가 작성한 글 목록
-    public Page<BoardEntity> myBoardList(Long memberId, int page) {
+    public Page<BoardEntity> myBoardList(Long memberId, final Pageable pageable) {
 
-        PageRequest pageRequest = PageRequest.of(page, 10);
         Page<BoardEntity> boards;
+        boards = boardRepository.findByMemberIdOrderByIdDesc(memberId, pageable);
 
-        boards = boardRepository.findByMemberIdOrderByIdDesc(memberId, pageRequest);
         return boards;
-
     }
 
     // 내가 좋아요한 글 목록
@@ -71,9 +68,8 @@ public class BoardService {
         for (HeartEntity heart : hearts) {
             boardIdList.add(heart.getBoardId());
         }
+
         return boardRepository.findByIdInOrderByIdDesc(boardIdList, pageable);
-
-
     }
 
 
@@ -83,6 +79,7 @@ public class BoardService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
         BoardEntity board = boardRepository.save(BoardEntity.from(boardDto, member));
+
         return board.getId();
     }
 
@@ -98,6 +95,7 @@ public class BoardService {
         board.setCategory(boardDto.getCategory());
         board.setTitle(boardDto.getTitle());
         board.setContent(boardDto.getContent());
+
         return board.getId();
     }
 
@@ -122,9 +120,11 @@ public class BoardService {
 
         if (check) {
             heartRepository.deleteById(new HeartId(memberId, boardId));
+
             return false;
         }
         heartRepository.save(new HeartEntity(memberId, boardId));
+
         return true;
     }
 
@@ -154,6 +154,7 @@ public class BoardService {
             throw new CustomException(NOT_AUTHORITY_COMMENT_MODIFY);
         } else {
             boardComment.setContent(dto.getContent());
+
             return boardComment.getId();
         }
 
@@ -170,8 +171,8 @@ public class BoardService {
 
         }
         boardCommentRepository.deleteById(commentId);
-        return "댓글이 삭제되었습니다.";
 
+        return "댓글이 삭제되었습니다.";
     }
 
     // 게시글 상세보기
@@ -208,6 +209,5 @@ public class BoardService {
                 .updateAt(board.getModifiedAt())
                 .comments(commentList)
                 .build();
-
     }
 }

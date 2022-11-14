@@ -15,17 +15,17 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     Page<BoardEntity> findByIdInOrderByIdDesc(List<Long> boardIdList, Pageable pageable);
 
-    Page<BoardEntity> findByMemberIdOrderByIdDesc(Long memberId, PageRequest pageRequest);
+    Page<BoardEntity> findByMemberIdOrderByIdDesc(Long memberId, Pageable pageable);
 
-    Page<BoardEntity> findByCategoryOrderByIdDesc(String category, PageRequest pageRequest);
+    Page<BoardEntity> findByCategoryOrderByIdDesc(String category, Pageable pageable);
 
-    Page<BoardEntity> findAllByOrderByIdDesc(PageRequest pageRequest);
+    Page<BoardEntity> findAllByOrderByIdDesc(Pageable pageable);
 
 
 
-    Page<BoardEntity> findByTitleContainingOrderByIdDesc(String keyword, PageRequest pageRequest);
+    Page<BoardEntity> findByTitleContainingOrderByIdDesc(String keyword, Pageable pageable);
 
-    Page<BoardEntity> findByCategoryAndTitleContainingOrderByIdDesc(String category, String keyword, PageRequest pageRequest);
+    Page<BoardEntity> findByCategoryAndTitleContainingOrderByIdDesc(String category, String keyword, Pageable pageable);
 
 
 

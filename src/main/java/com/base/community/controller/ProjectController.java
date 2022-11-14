@@ -10,6 +10,7 @@ import com.base.community.service.ProjectCommentService;
 import com.base.community.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/projects")
+@Slf4j
 public class ProjectController {
 
     private final ProjectService projectService;
@@ -26,8 +28,9 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 조회")
     @GetMapping
-    public ResponseEntity<?> showProject(final Pageable pageable) {
-        Page<Project> projects = projectService.getProject(pageable);
+    public ResponseEntity<?> showProject(final Pageable pageable,
+                                         @RequestParam(required = false) String keyword) {
+        Page<Project> projects = projectService.getProject(pageable, keyword);
         return ResponseEntity.ok(projects);
     }
 
