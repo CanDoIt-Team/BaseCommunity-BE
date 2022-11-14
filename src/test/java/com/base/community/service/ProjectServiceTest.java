@@ -408,10 +408,11 @@ class ProjectServiceTest {
                 .accept(true)
                 .build();
 
-        given(projectMemberRepository.findById(anyLong())).willReturn(Optional.of(projectMember));
+        given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(projectMemberRepository.findByMember(any())).willReturn(Optional.of(projectMember));
 
         //when
-        ProjectMember saveProjectMember = projectService.acceptProjectMember(anyLong());
+        ProjectMember saveProjectMember = projectService.acceptProjectMember(1L);
 
         //then
         assertTrue(saveProjectMember.isAccept());
