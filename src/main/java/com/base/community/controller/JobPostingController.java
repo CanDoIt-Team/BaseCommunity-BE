@@ -3,6 +3,7 @@ package com.base.community.controller;
 
 import com.base.community.model.entity.JobPosting;
 import com.base.community.service.JobPostingService;
+import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,8 @@ public class JobPostingController {
 
     private final JobPostingService jobPostingService;
 
+
+    @ApiOperation(value = "채용정보 리스트")
     @GetMapping()
     public ResponseEntity<?> showPosting(final Pageable pageable) {
         Page<JobPosting> postings = jobPostingService.getPosting(pageable);

@@ -1,15 +1,17 @@
 package com.base.community.model.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-import org.hibernate.envers.AuditOverride;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import java.io.Serializable;
 
 @Getter
-@Setter
 @Builder
 @Entity(name = "BOARD_HEART")
 @AllArgsConstructor
@@ -21,5 +23,5 @@ public class HeartEntity implements Serializable {
     private Long memberId;
 
     @Id
-    private Long  boardId;
+    private Long boardId;
 }

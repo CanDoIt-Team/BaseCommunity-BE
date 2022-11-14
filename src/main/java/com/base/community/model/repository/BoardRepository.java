@@ -12,9 +12,21 @@ import java.util.List;
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
 
-    Page<BoardEntity> findByCategory(String category, Pageable pageable);
 
-    Page<BoardEntity> findByMemberId(Long memberId, Pageable pageable);
+    Page<BoardEntity> findByIdInOrderByIdDesc(List<Long> boardIdList, Pageable pageable);
 
-    Page<BoardEntity> findByIdIn(List<Long> id, Pageable pageable);
+    Page<BoardEntity> findByMemberIdOrderByIdDesc(Long memberId, PageRequest pageRequest);
+
+    Page<BoardEntity> findByCategoryOrderByIdDesc(String category, PageRequest pageRequest);
+
+    Page<BoardEntity> findAllByOrderByIdDesc(PageRequest pageRequest);
+
+
+
+    Page<BoardEntity> findByTitleContainingOrderByIdDesc(String keyword, PageRequest pageRequest);
+
+    Page<BoardEntity> findByCategoryAndTitleContainingOrderByIdDesc(String category, String keyword, PageRequest pageRequest);
+
+
+
 }

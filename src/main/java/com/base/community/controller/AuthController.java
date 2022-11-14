@@ -5,6 +5,7 @@ import com.base.community.dto.*;
 import com.base.community.model.entity.Member;
 import com.base.community.security.TokenProvider;
 import com.base.community.service.MemberService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,34 +24,32 @@ public class AuthController {
     private final TokenProvider tokenProvider;
 
 
-    //회원가입
+    @ApiOperation(value = "회원가입")
     @PostMapping("/signup")
     public ResponseEntity<Member> signup(@RequestBody SignUpDto member) {
         Member result = this.memberService.signup(member);
         return ResponseEntity.ok(result);
     }
 
-
-    //회원가입 - 이메일체크
+    @ApiOperation(value = "회원가입 - 이메일 체크")
     @GetMapping("/check/email")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(this.memberService.checkEmail(email));
     }
 
-    //회원가입 - 닉네임 체크
+    @ApiOperation(value = "회원가입 - 닉네임 체크")
     @GetMapping("/check/nickname")
     public ResponseEntity<Boolean> checkNickName(@RequestParam String nickname) {
         return ResponseEntity.ok(this.memberService.checkNickName(nickname));
     }
 
-
-    //회원가입 - 이메일 인증
+    @ApiOperation(value = "회원가입 - 이메일 인증")
     @GetMapping("/email-auth")
     public ResponseEntity<Boolean> emailAuth(@RequestParam String id) {
         return ResponseEntity.ok(this.memberService.emailAuth(id));
     }
 
-    //로그인페이지 - 비밀번호변경(회원정보 입력)
+    @ApiOperation(value = "로그인 페이지 - 비밀번호 변경(회원정보 입력)")
     @PostMapping("/password/user-info")
     public ResponseEntity<Boolean> findPassword(@RequestBody ChangePasswordDto form) {
 
@@ -58,7 +57,7 @@ public class AuthController {
         return ResponseEntity.ok(this.memberService.findPassword(form));
     }
 
-    //로그인페이지 - 비밀번호변경(새 비밀번호 입력)
+    @ApiOperation(value = "로그인 페이지 - 비밀번호 변경(새 비밀번호 입력)")
     @PostMapping("/password/new")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto form, @RequestParam String uuid) {
 
@@ -67,7 +66,7 @@ public class AuthController {
     }
 
 
-    //로그인
+    @ApiOperation(value = "로그인")
     @PostMapping("/signin")
     public ResponseEntity<?> signIn(@RequestBody SignInDto request) {
         var member = this.memberService.authenticate(request);
@@ -77,16 +76,14 @@ public class AuthController {
 
     }
 
-
-    //회원정보
+    @ApiOperation(value = "마이페이지 - 회원정보")
     @GetMapping("/info")
     public ResponseEntity<?> getInfo(@RequestHeader(name = "auth-token") String token) {
         Member member = memberService.getMemberDetail(tokenProvider.getUser(token));
         return ResponseEntity.ok(member);
     }
 
-
-    // 회원정보 수정
+    @ApiOperation(value = "마이페에지 - 회원정보 수정")
     @PostMapping("/info")
     public ResponseEntity<Member> updateInfo(@RequestHeader(name = "auth-token") String token,
                                              @RequestBody UpdateMemberDto form, @RequestParam(value = "skill", required = false) String skill) {
@@ -95,8 +92,7 @@ public class AuthController {
         return ResponseEntity.ok(member);
     }
 
-
-    //인포페이지 비밀번호 변경
+    @ApiOperation(value = "마이페이지 - 비밀번호 변경")
     @PutMapping("/password/change")
     public ResponseEntity<String> updateMember(@RequestHeader(name = "auth-token") String token,
                                                @RequestBody InfoChangePasswordDto form) {
@@ -105,7 +101,7 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
-    //마이페이지 - 프로필 이미지 수정
+    @ApiOperation(value = "마이페이지 - 프로필 이미지 수정")
     @PostMapping("/profile-img")
     public ResponseEntity<Member> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
                                                    @RequestPart MultipartFile file) {
@@ -115,8 +111,7 @@ public class AuthController {
 
     }
 
-
-    //회원탈퇴
+    @ApiOperation(value = "마이페이지 - 회원탈퇴")
     @DeleteMapping("/withdraw")
     public ResponseEntity<String> deleteMember(@RequestHeader(name = "auth-token", required = false) String token) {
         String result = memberService.deleteMember(tokenProvider.getUser(token).getId());
@@ -124,12 +119,11 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
-
-    //로그아웃
+    @ApiOperation(value = "로그아웃")
     @GetMapping("/signout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
+        public String logout(HttpSession session) {
+            session.invalidate();
+            return "redirect:/";
     }
 
 }
