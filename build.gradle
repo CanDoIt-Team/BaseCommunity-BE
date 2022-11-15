@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.base'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 
 configurations {
     compileOnly {
@@ -59,6 +59,7 @@ dependencies {
     // jwt
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
+    // aws
     implementation group: 'io.awspring.cloud', name: 'spring-cloud-starter-aws-parameter-store-config'
 
     // chat
