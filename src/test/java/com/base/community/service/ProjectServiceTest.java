@@ -410,12 +410,14 @@ class ProjectServiceTest {
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
         given(projectMemberRepository.findByMember(any())).willReturn(Optional.of(projectMember));
+        given(projectRepository.findById(anyLong())).willReturn(Optional.of(project));
 
         //when
         ProjectMember saveProjectMember = projectService.acceptProjectMember(1L);
 
         //then
         assertTrue(saveProjectMember.isAccept());
+        assertEquals(1, saveProjectMember.getProject().getNowTotal());
     }
 
     @DisplayName("내 프로젝트")

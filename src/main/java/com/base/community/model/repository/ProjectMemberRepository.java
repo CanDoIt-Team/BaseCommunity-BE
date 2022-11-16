@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Long> {
     Optional<ProjectMember> findByMember(Member member);
     boolean existsByMember(Member member);
+    void deleteByMember(Member member);
+
 }
