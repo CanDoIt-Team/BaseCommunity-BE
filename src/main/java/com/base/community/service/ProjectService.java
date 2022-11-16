@@ -13,12 +13,17 @@ import com.base.community.model.repository.ProjectRepository;
 import com.base.community.model.repository.ProjectSkillRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Objects;
-import java.util.Optional;
+
+import java.util.*;
 
 import static com.base.community.exception.ErrorCode.*;
 
@@ -36,7 +41,7 @@ public class ProjectService {
     public Page<Project> getProject(final Pageable pageable, String keyword) {
         if (keyword == null) {
             return projectRepository.findAll(pageable);
-        }else{
+        } else {
             return projectRepository.findByTitleContainingOrderByCreatedAtDesc(keyword, pageable);
         }
     }
@@ -76,7 +81,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project updateProject(Long memberId, ProjectDto parameter) {
+    public Project updateProject(Long memberId, ProjectDto parameter, String skill) {
         var project = projectRepository.findById(parameter.getId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
 
@@ -99,13 +104,63 @@ public class ProjectService {
         project.setDevelopPeriod(parameter.getDevelopPeriod());
         project.setStartDate(parameter.getStartDate());
 
-        for (ProjectSkillDto dto : parameter.getProjectSkills()) {
-            ProjectSkill projectSkill = ProjectSkill.of(dto);
-            project.getProjectSkills().add(projectSkill);
+        if (!skill.isEmpty()) {
+            HashSet<String> skillList = new HashSet<>();
+            try {
+                JSONParser parser = new JSONParser();
+                JSONArray json = (JSONArray) parser.parse(skill);
+                json.forEach(item -> {
+                    JSONObject jsonObject = (JSONObject) JSONValue.parse(item.toString());
+                    skillList.add(jsonObject.get("value").toString());
+                });
+                HashSet<ProjectSkill> OriginSkills = projectSkillRepository.findAllByProjectId(parameter.getId());
+                HashSet<String> OriginSkillsName = new HashSet<>();
+                OriginSkills.forEach(item -> {
+                    OriginSkillsName.add(item.getName());
+                });
+                HashSet<String> addSkills = new HashSet<>(skillList);
+                addSkills.removeAll(OriginSkillsName);
+                if (!addSkills.isEmpty()) {
+                    List<ProjectSkillDto.Request> projectSkillDtoList = new ArrayList<>();
+                    addSkills.forEach(item -> {
+                        ProjectSkillDto.Request projectSkillDto = new ProjectSkillDto.Request();
+                        projectSkillDto.setName(item);
+                        projectSkillDtoList.add(projectSkillDto);
+                    });
+                    SaveAll(parameter.getId(), projectSkillDtoList);
+                }
+                HashSet<String> SubSkills = new HashSet<>(OriginSkillsName);
+                SubSkills.removeAll(skillList);
+                List<String> setToList = new ArrayList<>(SubSkills);
+                if (!SubSkills.isEmpty()) {
+                    DeleteAll(parameter.getId(), setToList);
+                }
+            }catch (ParseException e){
+                log.info(e.getMessage());
+            }
         }
-
+        projectRepository.save(project);
         return project;
     }
+
+
+    @Transactional
+    void DeleteAll(Long id, List<String> skill) {
+        projectSkillRepository.deleteByProjectIdAndNameIn(id, skill);
+    }
+
+
+    private void SaveAll(Long id, List<ProjectSkillDto.Request> projectSkillDtoList) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+        List<ProjectSkill> projectSkills = new ArrayList<>();
+        for (int i = 0; i < projectSkillDtoList.size(); i++) {
+            projectSkillDtoList.get(i).setProject(project);
+            projectSkills.add(projectSkillDtoList.get(i).toEntity());
+        }
+        projectSkillRepository.saveAll(projectSkills);
+    }
+
 
     public String deleteProject(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
@@ -125,15 +180,8 @@ public class ProjectService {
     }
 
     @Transactional
-    public String deleteProjectSkill(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
-        projectSkillRepository.deleteByProject(project);
-        return "삭제가 완료되었습니다.";
-    }
-
-    @Transactional
-    public ProjectMember registerProjectMember(Long memberId, Long projectId) {
+    public ProjectMember registerProjectMember(Long memberId, Long
+            projectId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
@@ -194,7 +242,7 @@ public class ProjectService {
     @Transactional
     public String cancelProject(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(()->new CustomException(NOT_FOUND_USER));
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
@@ -204,7 +252,7 @@ public class ProjectService {
         }
         ProjectMember projectMember = optionalProjectMember.get();
 
-        if(projectMember.isAccept()){
+        if (projectMember.isAccept()) {
             throw new CustomException(ALREADY_PROJECT_START);
         }
         projectMemberRepository.deleteByMember(member);
