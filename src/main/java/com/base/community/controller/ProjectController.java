@@ -44,8 +44,8 @@ public class ProjectController {
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping
     public ResponseEntity<Project> updateProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
-                                                 @RequestBody ProjectDto parameter) {
-        Project project = projectService.updateProject(tokenProvider.getUser(token).getId(), parameter);
+                                                 @RequestBody ProjectDto parameter,  @RequestParam(value = "skill", required = false) String skill) {
+        Project project = projectService.updateProject(tokenProvider.getUser(token).getId(), parameter, skill);
         return ResponseEntity.ok(project);
     }
 
@@ -64,12 +64,12 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.deleteProject(tokenProvider.getUser(token).getId(), projectId));
     }
 
-    @ApiOperation(value = "프로젝트 스킬 삭제")
-    @DeleteMapping("/{projectId}/skill")
-    public ResponseEntity<String> deleteProjectSkill(@PathVariable("projectId") Long projectId) {
-        String result = projectService.deleteProjectSkill(projectId);
-        return ResponseEntity.ok(result);
-    }
+//    @ApiOperation(value = "프로젝트 스킬 삭제")
+//    @DeleteMapping("/{projectId}/skill")
+//    public ResponseEntity<String> deleteProjectSkill(@PathVariable("projectId") Long projectId) {
+//        String result = projectService.deleteProjectSkill(projectId);
+//        return ResponseEntity.ok(result);
+//    }
 
     @ApiOperation(value = "프로젝트 신청")
     @GetMapping("/register/{projectId}")
@@ -113,14 +113,4 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.myProjectList(tokenProvider
                 .getUser(token).getId()));
     }
-
-    @ApiOperation(value = "프로젝트 신청 취소")
-    @DeleteMapping("/cancel/{projectId}")
-    public ResponseEntity<String> cancelProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
-                                                 @PathVariable("projectId") Long projectId) {
-        return ResponseEntity.ok(projectService
-                .cancelProject(tokenProvider.getUser(token).getId(), projectId));
-    }
-
 }
-
