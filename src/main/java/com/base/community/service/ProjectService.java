@@ -189,4 +189,25 @@ public class ProjectService {
         return projectRepository.findById(projectMember.getProject().getId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
     }
+
+    @Transactional
+    public String cancelProject(Long memberId, Long projectId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new CustomException(NOT_FOUND_USER));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+        Optional<ProjectMember> optionalProjectMember = projectMemberRepository.findByMember(member);
+        if (optionalProjectMember.isEmpty()) {
+            throw new CustomException(NOT_FOUND_USER_IN_PROJECT_MEMBER);
+        }
+        ProjectMember projectMember = optionalProjectMember.get();
+
+        if(projectMember.isAccept()){
+            throw new CustomException(ALREADY_PROJECT_START);
+        }
+        projectMemberRepository.deleteByMember(member);
+
+        return "삭제가 완료되었습니다.";
+    }
 }

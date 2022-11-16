@@ -35,6 +35,8 @@ public enum ErrorCode {
     ALREADY_PROJECT_REGISTER(HttpStatus.BAD_REQUEST, "이미 프로젝트를 신청하였습니다."),
     NOT_REGISTER_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트 신청 내역이 없습니다."),
     NOT_ACCEPT_PROJECT(HttpStatus.BAD_REQUEST, "신청한 프로젝트가 아직 수락되지 않았습니다."),
+    NOT_FOUND_USER_IN_PROJECT_MEMBER(HttpStatus.BAD_REQUEST, "프로젝트 멤버에 회원이 존재하지 않습니다."),
+    ALREADY_PROJECT_START(HttpStatus.BAD_REQUEST, "이미 프로젝트가 시작되어 당신은 도망칠 수 없습니다."),
 
     NOT_FOUND_BOARD_COMMENT(HttpStatus.BAD_REQUEST, "게시글 댓글이 존재하지 않습니다."),
     NOT_FOUND_BOARD(HttpStatus.BAD_REQUEST, "조회할 게시글이 없습니다."),
