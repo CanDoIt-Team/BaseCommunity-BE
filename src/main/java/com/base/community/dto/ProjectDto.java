@@ -13,4 +13,5 @@ public class ProjectDto {
     private String content;
     private Integer maxTotal;
     private LocalDate startDate;
-    private String developPeriod;}
+    private String developPeriod;
+}

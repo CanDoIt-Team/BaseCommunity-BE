@@ -53,16 +53,14 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project createProject(Long memberId, ProjectDto parameter) {
+    public Project createProject(Long memberId, ProjectDto parameter, String skill) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-
         // 프로젝트 중복 등록 불가
         Optional<Project> projectOptional = projectRepository.findByLeader(member);
         if (projectOptional.isPresent()) {
             throw new CustomException(ALREADY_PROJECT_CREATE);
         }
-
         // 다른 프로젝트 멤버일 경우 프로젝트 생성 불가
         Optional<ProjectMember> projectMember = projectMemberRepository.findByMember(member);
         if (projectMember.isPresent()) {
@@ -77,6 +75,40 @@ public class ProjectService {
                 .build());
         project.setLeader(member);
 
+        if (!skill.isEmpty()) {
+            HashSet<String> skillList = new HashSet<>();
+            try {
+                JSONParser parser = new JSONParser();
+                JSONArray json = (JSONArray) parser.parse(skill);
+                json.forEach(item -> {
+                    JSONObject jsonObject = (JSONObject) JSONValue.parse(item.toString());
+                    skillList.add(jsonObject.get("value").toString());
+                });
+                HashSet<ProjectSkill> OriginSkills = projectSkillRepository.findAllByProjectId(parameter.getId());
+                HashSet<String> OriginSkillsName = new HashSet<>();
+                OriginSkills.forEach(item -> {
+                    OriginSkillsName.add(item.getName());
+                });
+                HashSet<String> addSkills = new HashSet<>(skillList);
+                if (!addSkills.isEmpty()) {
+                    List<ProjectSkillDto.Request> projectSkillDtoList = new ArrayList<>();
+                    addSkills.forEach(item -> {
+                        ProjectSkillDto.Request projectSkillDto = new ProjectSkillDto.Request();
+                        projectSkillDto.setName(item);
+                        projectSkillDtoList.add(projectSkillDto);
+                    });
+                    List<ProjectSkill> projectSkills = new ArrayList<>();
+                    for (int i = 0; i < projectSkillDtoList.size(); i++) {
+                        projectSkillDtoList.get(i).setProject(project);
+                        projectSkills.add(projectSkillDtoList.get(i).toEntity());
+                    }
+                    projectSkillRepository.saveAll(projectSkills);
+                }
+            }catch (ParseException e){
+                log.info(e.getMessage());
+            }
+        }
+        projectRepository.save(project);
         return project;
     }
 
