@@ -113,4 +113,14 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.myProjectList(tokenProvider
                 .getUser(token).getId()));
     }
+
+    @ApiOperation(value = "프로젝트 신청 취소")
+    @DeleteMapping("/cancel/{projectId}")
+    public ResponseEntity<String> cancelProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
+                                                 @PathVariable("projectId") Long projectId) {
+        return ResponseEntity.ok(projectService
+                .cancelProject(tokenProvider.getUser(token).getId(), projectId));
+    }
+
 }
+
