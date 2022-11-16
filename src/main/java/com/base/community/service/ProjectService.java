@@ -118,6 +118,7 @@ public class ProjectService {
 
         return "삭제가 완료되었습니다.";
     }
+
     @Transactional
     public String deleteProjectSkill(Long projectId) {
         Project project = projectRepository.findById(projectId)
