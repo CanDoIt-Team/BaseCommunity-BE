@@ -149,9 +149,6 @@ public class ProjectService {
             throw new CustomException(ALREADY_PROJECT_MAX_TOTAL_FULL);
         }
 
-        project.setNowTotal(project.getNowTotal() + 1);
-        projectRepository.save(project);
-
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .member(member)
@@ -167,6 +164,11 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
         ProjectMember projectMember = projectMemberRepository.findByMember(member)
                 .orElseThrow(() -> new CustomException(NOT_VALID_PROJECT_REGISTER_MEMBER));
+
+        Project project = projectRepository.findById(projectMember.getProject().getId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PROJECT));
+
+        project.setNowTotal(project.getNowTotal() + 1);
 
         projectMember.setAccept(true);
         return projectMember;
