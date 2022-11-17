@@ -43,6 +43,7 @@ public class ProjectController {
 
 
     @ApiOperation(value= "프로젝트 작성 여부")
+    @GetMapping("/writeYn")
     public ResponseEntity<String> writeYn(@RequestHeader(name = "X-AUTH-TOKEN") String token){
 
         String result = projectService.writeYn(tokenProvider.getUser(token).getId());
