@@ -1,5 +1,10 @@
 package com.base.community.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.base.community.component.MailComponent;
 import com.base.community.dto.*;
 import com.base.community.exception.CustomException;
@@ -10,12 +15,14 @@ import com.base.community.model.repository.MemberRepository;
 import com.base.community.model.repository.MemberSkillsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,13 +30,11 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -44,14 +49,11 @@ public class MemberService implements UserDetailsService {
     private final MailComponent mailComponent;
     private final MemberRepository memberRepository;
     private final MemberSkillsRepository memberSkillsRepository;
-
     private final PasswordEncoder passwordEncoder;
+    private final AmazonS3 amazonS3;
 
-    @Value("${dir.LocalPath}")
-    private String baseLocalPath;
-
-    @Value("${dir.UrlPath}")
-    private String baseUrlPath;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
 
     //회원가입
@@ -303,45 +305,34 @@ public class MemberService implements UserDetailsService {
         memberSkillsRepository.saveAll(memberSkills);
     }
 
+    @Transactional
+    public Member uploadProfileImg(Long memberId, MultipartFile file) {
 
-    //프로필 업데이트
-    public Member uploadProfileImg(Long id, MultipartFile file) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-        MemberDto form = new MemberDto();
-
-        String saveFilename = "";
-        String urlFilename = "";
-
-        if (file != null) {
-
-            String originalFilename = file.getOriginalFilename();
-            String[] arrFilename = getNewSaveFile(baseLocalPath, baseUrlPath, originalFilename);
-
-            saveFilename = arrFilename[0];
-            urlFilename = arrFilename[1];
-
-            try {
-                File newFile = new File(saveFilename);
-                FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(newFile));
-            } catch (IOException e) {
-                log.info(e.getMessage());
-            }
+        // 기존 이미지 삭제
+        if (ObjectUtils.isNotEmpty(member.getFilename())) {
+            amazonS3.deleteObject(new DeleteObjectRequest(bucket, member.getFilename()));
         }
 
-        form.setFilename(saveFilename);
-        form.setUrlFilename(urlFilename);
-        form.setId(id);
+        // 신규 이미지 추가
+        String fileName = UUID.randomUUID().toString().concat(file.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
 
-        Optional<Member> optionalMember = memberRepository.findById(form.getId());
-        if (optionalMember.isEmpty()) {
-            throw new CustomException(NOT_FOUND_USER);
+        try(InputStream inputStream = file.getInputStream()) {
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패하였습니다.");
         }
-        Member member = optionalMember.get();
-        member.setFilename(form.getFilename());
-        member.setUrlFilename(form.getUrlFilename());
-        memberRepository.save(member);
+
+        member.setFilename(fileName);
+        member.setUrlFilename(amazonS3.getUrl(bucket, fileName).toString());
+
         return member;
-
     }
 
 
@@ -360,43 +351,4 @@ public class MemberService implements UserDetailsService {
 
         return "회원 탈퇴가 완료되었습니다.";
     }
-
-
-    private String[] getNewSaveFile(String baseLocalPath, String baseUrlPath, String originalFilename) {
-
-        LocalDate now = LocalDate.now();
-
-        String[] dirs = {
-                String.format("%s/%d/", baseLocalPath, now.getYear()),
-                String.format("%s/%d/%02d/", baseLocalPath, now.getYear(), now.getMonthValue()),
-                String.format("%s/%d/%02d/%02d/", baseLocalPath, now.getYear(), now.getMonthValue(), now.getDayOfMonth())};
-
-        String urlDir = String.format("%s/%d/%02d/%02d/", baseUrlPath, now.getYear(), now.getMonthValue(), now.getDayOfMonth());
-
-        for (String dir : dirs) {
-            File file = new File(dir);
-            if (!file.isDirectory()) {
-                file.mkdir();
-            }
-        }
-
-        String fileExtension = "";
-        if (originalFilename != null) {
-            int dotPos = originalFilename.lastIndexOf(".");
-            if (dotPos > -1) {
-                fileExtension = originalFilename.substring(dotPos + 1);
-            }
-        }
-
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        String newFilename = String.format("%s%s", dirs[2], uuid);
-        String newUrlFilename = String.format("%s%s", urlDir, uuid);
-        if (fileExtension.length() > 0) {
-            newFilename += "." + fileExtension;
-            newUrlFilename += "." + fileExtension;
-        }
-
-        return new String[]{newFilename, newUrlFilename};
-    }
-
 }
