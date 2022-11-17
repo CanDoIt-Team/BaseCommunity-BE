@@ -41,6 +41,15 @@ public class ProjectController {
         return ResponseEntity.ok(project);
     }
 
+
+    @ApiOperation(value= "프로젝트 작성 여부")
+    public ResponseEntity<String> writeYn(@RequestHeader(name = "X-AUTH-TOKEN") String token){
+
+        String result = projectService.writeYn(tokenProvider.getUser(token).getId());
+
+        return ResponseEntity.ok(result);
+    }
+
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping
     public ResponseEntity<Project> updateProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
@@ -64,12 +73,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.deleteProject(tokenProvider.getUser(token).getId(), projectId));
     }
 
-//    @ApiOperation(value = "프로젝트 스킬 삭제")
-//    @DeleteMapping("/{projectId}/skill")
-//    public ResponseEntity<String> deleteProjectSkill(@PathVariable("projectId") Long projectId) {
-//        String result = projectService.deleteProjectSkill(projectId);
-//        return ResponseEntity.ok(result);
-//    }
+
 
     @ApiOperation(value = "프로젝트 신청")
     @GetMapping("/register/{projectId}")
