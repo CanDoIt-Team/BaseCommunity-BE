@@ -156,7 +156,7 @@ class ProjectServiceTest {
                 .maxTotal(3)
                 .startDate(LocalDate.now())
                 .developPeriod("2")
-                .build());
+                .build(),"C++");
 
         // then
         assertEquals(1L, saveProject.getId());

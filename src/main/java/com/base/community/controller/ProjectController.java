@@ -52,8 +52,8 @@ public class ProjectController {
     @ApiOperation(value = "프로젝트 등록")
     @PostMapping
     public ResponseEntity<Project> createProject(@RequestHeader(name = "X-AUTH-TOKEN") String token,
-                                      @RequestBody ProjectDto parameter) {
-        Project project = projectService.createProject(tokenProvider.getUser(token).getId(), parameter);
+                                      @RequestBody ProjectDto parameter, @RequestParam(value = "skill", required = false) String skill) {
+        Project project = projectService.createProject(tokenProvider.getUser(token).getId(), parameter, skill);
         return ResponseEntity.ok(project);
     }
 
