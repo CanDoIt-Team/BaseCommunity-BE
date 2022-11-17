@@ -291,4 +291,21 @@ public class ProjectService {
 
         return "삭제가 완료되었습니다.";
     }
+
+    public String writeYn(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+        // 프로젝트 중복 등록 불가
+        Optional<Project> projectOptional = projectRepository.findByLeader(member);
+        if (projectOptional.isPresent()) {
+            throw new CustomException(ALREADY_PROJECT_CREATE);
+        }
+        // 다른 프로젝트 멤버일 경우 프로젝트 생성 불가
+        Optional<ProjectMember> projectMember = projectMemberRepository.findByMember(member);
+        if (projectMember.isPresent()) {
+            throw new CustomException(ALREADY_PROJECT_REGISTER);
+        }
+
+        return "작성가능한 회원입니다.";
+    }
 }
