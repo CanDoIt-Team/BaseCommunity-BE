@@ -74,7 +74,7 @@ public class Project extends BaseEntity{
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .maxTotal(dto.getMaxTotal())
-                .nowTotal(0)
+                .nowTotal(1)
                 .isComplete(false)
                 .startDate(dto.getStartDate())
                 .developPeriod(dto.getDevelopPeriod())
