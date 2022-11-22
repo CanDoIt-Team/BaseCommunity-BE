@@ -26,9 +26,8 @@ public class AuthController {
 
     @ApiOperation(value = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<Member> signup(@RequestBody SignUpDto member) {
-        Member result = this.memberService.signup(member);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<MemberDto> signup(@RequestBody SignUpDto member) {
+        return ResponseEntity.ok(this.memberService.signup(member));
     }
 
     @ApiOperation(value = "회원가입 - 이메일 체크")
@@ -78,18 +77,16 @@ public class AuthController {
 
     @ApiOperation(value = "마이페이지 - 회원정보")
     @GetMapping("/info")
-    public ResponseEntity<?> getInfo(@RequestHeader(name = "auth-token") String token) {
-        Member member = memberService.getMemberDetail(tokenProvider.getUser(token));
-        return ResponseEntity.ok(member);
+    public ResponseEntity<MemberDto> getInfo(@RequestHeader(name = "auth-token") String token) {
+        return ResponseEntity.ok(memberService.getMemberDetail(tokenProvider.getUser(token)));
     }
 
     @ApiOperation(value = "마이페에지 - 회원정보 수정")
     @PostMapping("/info")
-    public ResponseEntity<Member> updateInfo(@RequestHeader(name = "auth-token") String token,
+    public ResponseEntity<MemberDto> updateInfo(@RequestHeader(name = "auth-token") String token,
                                              @RequestBody UpdateMemberDto form, @RequestParam(value = "skill", required = false) String skill) {
         log.info(skill);
-        Member member = memberService.updateMember(tokenProvider.getUser(token).getId(), form, skill);
-        return ResponseEntity.ok(member);
+        return ResponseEntity.ok(memberService.updateMember(tokenProvider.getUser(token).getId(), form, skill));
     }
 
     @ApiOperation(value = "마이페이지 - 비밀번호 변경")
@@ -103,11 +100,9 @@ public class AuthController {
 
     @ApiOperation(value = "마이페이지 - 프로필 이미지 수정")
     @PostMapping("/profile-img")
-    public ResponseEntity<Member> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
+    public ResponseEntity<MemberDto> uploadProfileImg(@RequestHeader(name = "auth-token") String token,
                                                    @RequestPart MultipartFile file) {
-        Member member = memberService.uploadProfileImg(tokenProvider.getUser(token).getId(), file);
-
-        return ResponseEntity.ok(member);
+        return ResponseEntity.ok(memberService.uploadProfileImg(tokenProvider.getUser(token).getId(), file));
 
     }
 
@@ -115,7 +110,6 @@ public class AuthController {
     @DeleteMapping("/withdraw")
     public ResponseEntity<String> deleteMember(@RequestHeader(name = "auth-token", required = false) String token) {
         String result = memberService.deleteMember(tokenProvider.getUser(token).getId());
-
         return ResponseEntity.ok(result);
     }
 

@@ -21,6 +21,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,6 +52,7 @@ public class MemberService implements UserDetailsService {
     private final MemberSkillsRepository memberSkillsRepository;
     private final PasswordEncoder passwordEncoder;
     private final AmazonS3 amazonS3;
+    private final ModelMapper modelMapper;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -58,7 +60,7 @@ public class MemberService implements UserDetailsService {
 
     //회원가입
     @Transactional
-    public Member signup(SignUpDto signUpDto) {
+    public MemberDto signup(SignUpDto signUpDto) {
         if (this.memberRepository.existsByEmail(signUpDto.getEmail())) {
             throw new CustomException(ALREADY_REGISTERED_USER);
         }
@@ -82,10 +84,12 @@ public class MemberService implements UserDetailsService {
                         + "<a target='_blank' href='https://basecommunity.netlify.app/users/email-auth?id="
                         + uuid + "'> 가입 완료 </a></div>")
                 .build();
-        log.info(signUpDto.getEmail() + "회원 인증 이메일 발송완료");
+        log.info("# " + signUpDto.getEmail() + "회원 인증 이메일 발송완료");
         mailComponent.sendEmail(mailDto);
 
-        return member;
+        MemberDto memberDto = modelMapper.map(member, MemberDto.class);
+
+        return memberDto;
     }
 
 
@@ -201,14 +205,16 @@ public class MemberService implements UserDetailsService {
 //        if (!this.passwordEncoder.matches(form.getPassword(), user.getPassword())) {
 //            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
 //        }
+
         return member;
     }
 
 
     //마이페이지 - 회원정보 가져오기
-    public Member getMemberDetail(User user) {
-        return memberRepository.findById(user.getId())
+    public MemberDto getMemberDetail(User user) {
+        Member member = memberRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+        return modelMapper.map(member, MemberDto.class);
     }
 
 
@@ -228,7 +234,7 @@ public class MemberService implements UserDetailsService {
 
 
     // 멤버정보 업데이트
-    public Member updateMember(Long id, UpdateMemberDto form, String skill) {
+    public MemberDto updateMember(Long id, UpdateMemberDto form, String skill) {
         form.setId(id);
         Optional<Member> optionalMember = memberRepository.findById(form.getId());
         if (optionalMember.isEmpty()) {
@@ -286,7 +292,7 @@ public class MemberService implements UserDetailsService {
             }
         }
         memberRepository.save(member);
-        return member;
+        return modelMapper.map(member, MemberDto.class);
     }
 
     private void DeleteAll(Long id, List<String> skill) {
@@ -306,7 +312,7 @@ public class MemberService implements UserDetailsService {
     }
 
     @Transactional
-    public Member uploadProfileImg(Long memberId, MultipartFile file) {
+    public MemberDto uploadProfileImg(Long memberId, MultipartFile file) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
@@ -332,7 +338,7 @@ public class MemberService implements UserDetailsService {
         member.setFilename(fileName);
         member.setUrlFilename(amazonS3.getUrl(bucket, fileName).toString());
 
-        return member;
+        return modelMapper.map(member, MemberDto.class);
     }
 
 

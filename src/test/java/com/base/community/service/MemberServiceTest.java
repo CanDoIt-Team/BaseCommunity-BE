@@ -8,7 +8,6 @@ import com.base.community.model.entity.Member;
 import com.base.community.model.entity.MemberSkills;
 import com.base.community.model.repository.MemberRepository;
 import com.base.community.security.TokenProvider;
-import io.jsonwebtoken.lang.Assert;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
@@ -18,10 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,6 +51,9 @@ class MemberServiceTest {
 
     @Mock
     private MailComponent mailComponent;
+
+    @Mock
+    private ModelMapper modelMapper;
 
 
     @Spy
@@ -103,11 +104,18 @@ class MemberServiceTest {
         given(memberRepository.existsByEmail(any())).willReturn(false);
         given(memberRepository.existsByNickname(any())).willReturn(false);
         given(mailComponent.sendEmail(any())).willReturn(true);
-        given(memberRepository.save(any()))
-                .willReturn(member);
+        given(memberRepository.save(any())).willReturn(member);
+        given(modelMapper.map(any(), any())).willReturn(MemberDto.builder()
+                .id(1L)
+                .email("test@test.com")
+                .name("테스트")
+                .nickname("멍멍이")
+                .birth(LocalDate.now())
+                .phone("01012345678")
+                .build());
 
         //when
-        Member entity = memberService.signup(SignUpDto.builder()
+        MemberDto memberDto = memberService.signup(SignUpDto.builder()
                 .password("1234")
                 .email("thth@thth.com")
                 .name("tets")
@@ -117,13 +125,12 @@ class MemberServiceTest {
                 .build());
 
         //then
-        assertEquals(1L, entity.getId());
-        assertEquals("테스트", entity.getName());
-        assertEquals("test@test.com", entity.getEmail());
-        assertEquals("멍멍이", entity.getNickname());
-        assertEquals(LocalDate.now(), entity.getBirth());
-        assertEquals("01012345678", entity.getPhone());
-        assertEquals("java", entity.getSkills().get(0).getName());
+        assertEquals(1L, memberDto.getId());
+        assertEquals("테스트", memberDto.getName());
+        assertEquals("test@test.com", memberDto.getEmail());
+        assertEquals("멍멍이", memberDto.getNickname());
+        assertEquals(LocalDate.now(), memberDto.getBirth());
+        assertEquals("01012345678", memberDto.getPhone());
     }
 
     @DisplayName("회원 가입 실패 - 이미 존재하는 이메일")
@@ -297,8 +304,16 @@ class MemberServiceTest {
                 .build();
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(modelMapper.map(any(), any())).willReturn(MemberDto.builder()
+                .id(1L)
+                .email("test@test.com")
+                .name("테스트")
+                .nickname("멍멍이")
+                .birth(LocalDate.now())
+                .phone("01012345678")
+                .build());
 
-        Member result = memberService.getMemberDetail(User.builder()
+        MemberDto result = memberService.getMemberDetail(User.builder()
                 .id(1L)
                 .email("test@test.com")
                 .build());
@@ -353,8 +368,16 @@ class MemberServiceTest {
                 .build();
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(modelMapper.map(any(), any())).willReturn(MemberDto.builder()
+                .id(1L)
+                .email("test@test.com")
+                .name("테스트")
+                .nickname("징징이")
+                .birth(LocalDate.now().plusDays(3))
+                .phone("01099999999")
+                .build());
 
-        Member result = memberService.updateMember(1L, UpdateMemberDto.builder()
+        MemberDto result = memberService.updateMember(1L, UpdateMemberDto.builder()
                 .Nickname("징징이")
                 .birth(LocalDate.now().plusDays(3))
                 .phone("01099999999")
@@ -363,9 +386,8 @@ class MemberServiceTest {
 
         assertEquals("징징이", result.getNickname());
         assertEquals(LocalDate.now().plusDays(3), result.getBirth());
-        assertEquals("01099999999",result.getPhone());
+        assertEquals("01099999999", result.getPhone());
     }
-
 
 
     @Test
